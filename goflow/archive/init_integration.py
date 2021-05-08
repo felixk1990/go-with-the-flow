@@ -17,7 +17,6 @@ import networkx as nx
 import functions_template as ft
 import complex_flux as cf
 
-
 # these objects are composed in order to enable a direct scipy independent solving of relevant ode systems
 class integrate_kirchoff:
 
