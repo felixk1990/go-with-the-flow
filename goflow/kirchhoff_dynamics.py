@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:   kramer
-# @Last modified time: 2021-05-09T00:42:05+02:00
+# @Last modified time: 2021-05-09T12:16:06+02:00
 # @License: MIT
 
 import random as rd
@@ -12,128 +12,40 @@ import numpy as np
 import sys
 import goflow.kirchhoff_init as kirchhoff_init
 
-class kirchhoff_dynamics(kirchoff_init,object):
+class dynamic_flow_circuit(kirchoff_init.circuit,object):
 
-    # generate an edge weight pattern to calibrate for cycle coalescence algorithm
-    def generate_pattern(self,mode):
-        if 'random' in mode:
-            for e in self.G.edges():
-                self.G.edges[e]['conductivity']=rd.uniform(0.,1.)*5.
-        if 'gradient' in mode:
-            list_n=list(self.G.nodes())
-            # ref_p=self.G.nodes[list_n[0]]['pos']
-            ref_p=np.array([0,0,1])
-            for e in self.G.edges():
-                p=(np.array(self.G.edges[e]['slope'][0])+np.array(self.G.edges[e]['slope'][1]))/2.
-                r=np.linalg.norm(p-ref_p)
-                self.G.edges[e]['conductivity']=3./r
-        if 'bigradient' in mode:
-            ref1=0
-            ref2=int((self.G.number_of_nodes()-1)/2)
-            list_n=list(self.G.nodes())
-            ref_p1=self.G.nodes[list_n[ref1]]['pos']
-            ref_p2=self.G.nodes[list_n[ref2]]['pos']
-            for e in self.G.edges():
-                p=(np.array(self.G.edges[e]['slope'][0])+np.array(self.G.edges[e]['slope'][1]))/2.
-                r1=np.linalg.norm(p-ref1)
-                r2=np.linalg.norm(p-ref2)
-                self.G.edges[e]['conductivity']=(3./r1 +2./r2)
+    def __init__(self):
+        super(dynamic_flow_circuit,self).__init__()
 
-        if 'nested_square' in mode:
-            # so far only for cube /square
-            dim=len(list(nx.get_node_attributes(self.G,'pos').values())[0])
-            w=5.
-            nx.set_edge_attributes(self.G,w,'conductivity')
-            nx.set_edge_attributes(self.G,False,'tracked')
-            if dim==2:
-                corners=[n for n in self.G.nodes() if self.G.degree(n)==2]
-            if dim==3:
-                corners=[n for n in self.G.nodes() if self.G.degree(n)==3]
-            outskirt_paths=[]
-
-            for i,c1 in enumerate(corners[:-1]):
-                for j,c2 in enumerate(corners[i+1:]):
-                    connection_existent=False
-                    p1=self.G.nodes[c1]['pos']
-
-                    p2=self.G.nodes[c2]['pos']
-
-                    if dim==2:
-                        connection_existent = (p1[0]==p2[0])  or  (p1[1]==p2[1])
-                    if dim==3:
-                        connection_existent = ((p1[0]==p2[0] and p1[1]==p2[1]) or (p1[0]==p2[0] and p1[2]==p2[2]) or (p1[1]==p2[1] and p1[2]==p2[2]))
-                    if connection_existent:
-                        outskirt_paths.append(nx.shortest_path(self.G,source=c1,target=c2))
-
-            for p in outskirt_paths:
-                for i,n in enumerate(p[1:]):
-                    self.G.edges[(p[i],n)]['conductivity']=w
-                    self.G.edges[(p[i],n)]['tracked']=True
-
-
-            system_scale=len(outskirt_paths[0])-1
-            divisions=1.
-            divide_conquer=True
-            while divide_conquer:
-
-                divisions*=2.
-                system_scale/=2.
-                if system_scale==1.:
-                    divide_conquer=False
-                parts_of_the_line=[]
-                divine_paths=[]
-                delta_w_paths=[]
-                for p in outskirt_paths:
-                    for j in range(int(divisions)):
-                        if j%2==1:
-                            parts_of_the_line.append(p[int(len(p)*j/divisions)])
-                dict_face={}
-                for i,c1 in enumerate(parts_of_the_line[:-1]):
-                    for j,c2 in enumerate(parts_of_the_line[i+1:]):
-                        connection_existent=False
-                        p1=self.G.nodes[c1]['pos']
-                        p2=self.G.nodes[c2]['pos']
-
-                        if dim==2:
-                            connection_existent = (p1[0]==p2[0])  or  (p1[1]==p2[1])
-                        if dim==3:
-                            connection_existent = ((p1[0]==p2[0] and p1[1]==p2[1]) or (p1[0]==p2[0] and p1[2]==p2[2]) or (p1[1]==p2[1] and p1[2]==p2[2]))
-
-                        if connection_existent:
-                            divine_paths.append(nx.shortest_path(self.G,source=c1,target=c2))
-                            delta_w_paths.append(0.)
-                            if (p1[0]==p2[0]):
-                                delta_w_paths[-1]=0.5
-                                if dim==3:
-                                    if (p1[2]!=p2[2]):
-                                        delta_w_paths[-1]=0.
-                max_d=np.amax([len(d) for d in divine_paths])
-                for id_d,d in enumerate(divine_paths):
-                    if len(d)==max_d:
-                        for i,n in enumerate(d[1:]):
-                            if not self.G.edges[(d[i],n)]['tracked']:
-                                self.G.edges[(d[i],n)]['conductivity']=(delta_w_paths[id_d]+w)/divisions
-                                self.G.edges[(d[i],n)]['tracked']=True
-                # outskirt_paths+=divine_paths
-
-        self.translate_weight('conductivity')
-
+        self.graph_mode={
+            'simpleleaf':self.init_source_simpleleaf,
+            'pointleaf':self.init_source_pointleaf_L,
+            'rootleaf':self.init_source_rootleaf,
+            'bilehex':self.init_source_bilehex,
+            'bloodhex':self.init_source_bloodhex,
+            'centralspawn':self.init_source_centralspawn,
+            'pointleaf':self.init_source_pointleaf_R,
+            'pointleaf':self.init_source_short_distance,
+            'pointleaf':self.init_source_short_distance,
+            'terminals':self.init_source_terminals,
+            'multi':self.init_source_multi,
+            'multi_cluster':self.init_source_multi_cluster,
+            'max_distance':self.init_source_max_distance,
+            'terminals_dipole':self.init_source_terminals_dipole,
+            'terminals_monopole':self.init_source_terminals_monopole
+        }
     # test consistency of conductancies & sources
     def test_consistency(self):
 
         self.set_network_attributes()
-        sumit=0
-        tolerance=0.00001
+        tolerance=0.000001
+        # check value consistency
+        conductivities=np.fromiter(nx.get_edge_attributes(self.G, 'conductivity').values(),float)
+        if len(np.where(conductivities <=0 )[0]) !=0:
+            sys.exit('Error, conductivities negaitve/zero!')
 
-        for e in nx.edges(self.G):
-
-            if self.G.edges[e]['conductivity']<=0:
-                sys.exit('Error, conductivity fatality!')
-
-        for n in nx.nodes(self.G):
-            sumit+=self.G.nodes[n]['source']
-
-        if sumit>tolerance:
+        sources=np.fromiter(nx.get_node_attributes(self.G, 'source').values(),float)
+        if np.sum(sources) > tolerance:
             sys.exit('Error, input and ouput flows not balanced!')
         else:
             print('set_source_landscape(): '+self.graph_mode+' is set and consistent :)')
@@ -141,86 +53,14 @@ class kirchhoff_dynamics(kirchoff_init,object):
     # set a certain set of boundary conditions for the given networks
     def set_source_landscape(self,mode):
 
-        # reinitialze circuit
-        H=nx.Graph(self.G)
-        self.G=nx.Graph()
-        self.counter_e=0
-        self.counter_n=0
-        dict_nodes={}
-        for i,n in enumerate(H.nodes()):
-            idx_n=self.count_n()-1
-            self.G.add_node(idx_n,pos=H.nodes[n]['pos'],label=H.nodes[n]['label'])
-            dict_nodes.update({n:idx_n})
+        if mode in self.graph_mode.keys():
 
-        for i,e in enumerate(H.edges()):
-            idx_e=self.count_e()
-            self.G.add_edge(dict_nodes[e[0]],dict_nodes[e[1]],slope=(H.nodes[e[0]]['pos'],H.nodes[e[1]]['pos']),label=H.edges[e]['label'])
-        self.initialize_circuit()
-        #modes:
-        #1: single source-sink
-        #2: single source -all sinks apart from that, left-handed
-        #3: small area of sources
-        #4: bile, lobule structure sinks at edgepoints, sources everywehere else
-        #5: blood, lobule structure sourcse at edgepoints, sinks everywehere else
-        #6: central source, all sinks part from that
-        #7: single source -all sinks apart from that, right-handed
-        #8: single source -all sinks apart from that, shortest distance
-        #9: single source -all sinks apart from that, longest distance
-        if mode == 1    :
-            self.init_source_simpleleaf()
-            self.graph_mode='simpleleaf'
-        elif mode == 2  :
-            self.init_source_pointleaf_L()
-            self.graph_mode='pointleaf'
-        elif mode == 3  :
-            self.init_source_rootleaf()
-            self.graph_mode='rootleaf'
-        elif mode == 4  :
-            self.init_source_bilehex()
-            self.graph_mode='bilehex'
-        elif mode == 5  :
-            self.init_source_bloodhex()
-            self.graph_mode='bloodhex'
-        elif mode == 6  :
-            self.init_source_centralspawn()
-            self.graph_mode='centralspawn'
-        elif mode == 7 :
-            self.init_source_pointleaf_R()
-            self.graph_mode='pointleaf'
-        elif mode == 8 :
-            self.init_source_short_distance()
-            self.graph_mode='pointleaf'
-        elif mode == 9 :
-            self.init_source_long_distance()
-            self.graph_mode='pointleaf'
-        elif mode == 10 :
-            self.init_source_terminals()
-            self.graph_mode='terminals'
-        elif mode == 11 :
-            self.init_source_multi()
-            self.graph_mode='multi'
-        elif mode == 12:
-            self.init_source_multi_cluster()
-            self.graph_mode='multi_cluster'
-
-        elif mode == 13:
-            self.init_source_max_distance()
-            self.graph_mode='max_distance'
-
-        elif mode == 14 :
-            self.init_source_terminals_dipole()
-            self.graph_mode='terminals_dipole'
-
-        elif mode == 15 :
-            self.init_source_terminals_monopole()
-            self.graph_mode='terminals_monopole'
+            self.graph_mode[mode]()
 
         else :
             sys.exit('Whooops, Error: Define Input/output-flows for  the network.')
 
-        self.C=np.ones(self.G.number_of_edges())*np.amax(np.absolute(self.J))
         self.test_consistency()
-        self.B, self.BT=self.get_incidence_matrices()
 
     def init_source_simpleleaf(self):
 
@@ -616,6 +456,38 @@ class kirchhoff_dynamics(kirchoff_init,object):
             self.G.nodes[n]['color']='#ee2323'
             self.J[dict_nodes[n]]=1.*self.f
 
+    def set_terminals_potentials(self,p0):
+        idx_potential=[]
+        idx_sources=[]
+        for j,n in enumerate(nx.nodes(self.G)):
+
+            if self.G.nodes[n]['source']>0:
+
+                self.G.nodes[n]['potential']=1
+                self.G.nodes[n]['color']='#ee2323'
+                self.V[j]=p0
+                idx_potential.append(j)
+            elif self.G.nodes[n]['source']<0:
+
+                self.G.nodes[n]['potential']=0.
+                self.G.nodes[n]['color']='#ee2323'
+                self.V[j]=0.
+                idx_potential.append(j)
+            else:
+
+                self.G.nodes[n]['source']=0.
+                self.G.nodes[n]['color']='#1eb22f'
+                self.J[j]=0.
+                idx_sources.append(j)
+
+        self.G.graph['sources']=idx_sources
+        self.G.graph['potentials']=idx_potential
+
+class dynamic_flux_circuit(dynamic_flow_circuit,object):
+
+    def __init__(self):
+        super(dynamic_flux_circuit,self).__init__()
+        self.J_C=[]
     def set_solute_flux_boundary(self,flux):
 
         for j,n in enumerate(nx.nodes(self.G)):
@@ -643,33 +515,6 @@ class kirchhoff_dynamics(kirchoff_init,object):
         self.R=np.add(np.ones(m),np.random.rand(m))*dict_pars['R']
         self.C=np.power(self.R,4)*self.k
         self.G.graph['conductance']=self.k
-
-    def calc_root_incidence(self):
-        root=0
-        sink=0
-        # q=[]
-        for i,n in enumerate(self.G.nodes()):
-            if self.G.nodes[n]['source'] >  0:
-                root=n
-            if K.G.nodes[n]['source'] <  0:
-                sink=n
-
-        E_1=list(self.G.edges(root))
-        E_2=list(self.G.edges(sink))
-        E_ROOT=[]
-        E_SINK=[]
-        for e in E_1:
-            if e[0]!=root:
-                E_ROOT+=list(self.G.edges(e[0]))
-            else:
-                E_ROOT+=list(self.G.edges(e[1]))
-
-        for e in E_2:
-            if e[0]!=sink:
-                E_SINK+=list(self.G.edges(e[0]))
-            else:
-                E_SINK+=list(self.edges(e[1]))
-        return E_ROOT,E_SINK
 
     def set_terminals_potentials(self,p0):
         idx_potential=[]
