@@ -2,13 +2,24 @@
 # @Date:   2021-05-08T20:34:30+02:00
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
-# @Last modified by:   kramer
-# @Last modified time: 2021-05-09T11:56:30+02:00
+# @Last modified by:    Felix Kramer
+# @Last modified time: 2021-05-09T23:32:34+02:00
 # @License: MIT
 
 import networkx as nx
 import numpy as np
 import sys
+
+def initialize_circuit_from_networkx(input_graph):
+
+    K=circuit()
+    K.G=nx.convert_node_labels_to_integers(input_graph, first_label=0, ordering='default')
+    K.initialize_circuit()
+
+    K.list_graph_nodes=list(K.G.nodes())
+    K.list_graph_edges=list(K.G.edges())
+
+    return K
 
 class circuit:
 
@@ -44,15 +55,10 @@ class circuit:
         self.H_C=[]
         self.H_J=[]
 
+        self.list_graph_nodes=[]
+        self.list_graph_edges=[]
 
     # custom functions
-    def initialize_circuit_from_networkx(self,input_graph):
-
-        self.G=nx.convert_node_labels_to_integers(input_graph, first_label=0, ordering='default')
-        self.initialize_circuit()
-
-        self.list_graph_nodes=list(self.G.nodes())
-        self.list_graph_edges=list(self.G.edges())
 
     def initialize_circuit(self):
 
@@ -61,14 +67,15 @@ class circuit:
 
         init_val=['#269ab3',0,0,5]
         init_attributes=['color','source','potential','conductivity']
+
         for i,val in enumerate(init_val):
             nx.set_node_attributes(self.G, val , name=init_attributes[i])
 
-        for k in dict_nodes.keys():
-            dict_nodes[k]=np.zeros(n)
+        for k in self.dict_nodes.keys():
+            self.dict_nodes[k]=np.zeros(n)
 
-        for k in dict_edges.keys():
-            dict_edges[k]=np.ones(n)
+        for k in self.dict_edges.keys():
+            self.dict_edges[k]=np.ones(n)
 
         self.set_network_attributes()
         print('circuit(): initialized and ready for (some) action :)')
@@ -113,7 +120,7 @@ class circuit:
             for k in self.G.nodes[n].keys():
                 self.H.nodes[n][k]=self.G.nodes[n][k]
             self.H_J.append(self.G.nodes[n]['source'])
-        for e inlist_pruned_edges:
+        for e in list_pruned_edges:
             self.H_C.append(self.H.edges[e]['conductivity'])
 
         self.H_C=np.asarray(self.H_C)
