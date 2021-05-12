@@ -2,53 +2,48 @@
 # @Date:   2021-05-08T20:35:25+02:00
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
-# @Last modified by:   kramer
-# @Last modified time: 2021-05-09T12:16:06+02:00
+# @Last modified by:    Felix Kramer
+# @Last modified time: 2021-05-12T23:14:30+02:00
 # @License: MIT
 
 import random as rd
 import networkx as nx
 import numpy as np
 import sys
-import goflow.kirchhoff_init as kirchhoff_init
+import kirchhoff_init as kirchhoff_init
 
-class dynamic_flow_circuit(kirchoff_init.circuit,object):
+def initialize_flow_circuit_from_networkx(input_graph):
+
+    kirchhoff_graph=dynamic_flow_circuit()
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+def initialize_flux_circuit_from_networkx(input_graph):
+
+    kirchhoff_graph=dynamic_flux_circuit()
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+
+class dynamic_flow_circuit(kirchhoff_init.circuit,object):
 
     def __init__(self):
         super(dynamic_flow_circuit,self).__init__()
 
         self.graph_mode={
-            'simpleleaf':self.init_source_simpleleaf,
-            'pointleaf':self.init_source_pointleaf_L,
-            'rootleaf':self.init_source_rootleaf,
-            'bilehex':self.init_source_bilehex,
-            'bloodhex':self.init_source_bloodhex,
+
             'centralspawn':self.init_source_centralspawn,
-            'pointleaf':self.init_source_pointleaf_R,
-            'pointleaf':self.init_source_short_distance,
-            'pointleaf':self.init_source_short_distance,
+            'root_short':self.init_source_root_short,
+            'root_long':self.init_source_root_long,
             'terminals':self.init_source_terminals,
-            'multi':self.init_source_multi,
-            'multi_cluster':self.init_source_multi_cluster,
-            'max_distance':self.init_source_max_distance,
+            'multi_source':self.init_source_multi,
+            'multi_source_cluster':self.init_source_multi_cluster,
             'terminals_dipole':self.init_source_terminals_dipole,
             'terminals_monopole':self.init_source_terminals_monopole
+
         }
-    # test consistency of conductancies & sources
-    def test_consistency(self):
-
-        self.set_network_attributes()
-        tolerance=0.000001
-        # check value consistency
-        conductivities=np.fromiter(nx.get_edge_attributes(self.G, 'conductivity').values(),float)
-        if len(np.where(conductivities <=0 )[0]) !=0:
-            sys.exit('Error, conductivities negaitve/zero!')
-
-        sources=np.fromiter(nx.get_node_attributes(self.G, 'source').values(),float)
-        if np.sum(sources) > tolerance:
-            sys.exit('Error, input and ouput flows not balanced!')
-        else:
-            print('set_source_landscape(): '+self.graph_mode+' is set and consistent :)')
 
     # set a certain set of boundary conditions for the given networks
     def set_source_landscape(self,mode):
@@ -62,247 +57,93 @@ class dynamic_flow_circuit(kirchoff_init.circuit,object):
 
         self.test_consistency()
 
-    def init_source_simpleleaf(self):
+    def get_pos(self):
 
-        spine_nodes=1+2*int((-0.5+np.sqrt(0.25+(self.G.number_of_nodes()-1)/3.)))
+        pos_key='pos'
+        reset_layout=False
+        for j,n in enumerate(self.G.nodes()):
+            if pos_key not in self.G.nodes[n]:
+                reset_layout=True
+        if reset_layout:
+            print('set networkx.spring_layout()')
+            pos = nx.spring_layout(self.G)
+        else:
+            pos = nx.get_node_attributes(self.G,'pos')
 
-        for j,n in enumerate(nx.nodes(self.G)):
+        return pos
 
-            if n==(0,0):
-                self.G.nodes[n]['source']=1*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=1*self.f
-            elif n==(spine_nodes-1,0):
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
-            else:
-                self.J[j]=0
-
-    def init_source_pointleaf_L(self):
-
-        pos_x=[]
-        for n in nx.nodes(self.G):
-            pos_x.append(self.G.nodes[n]['pos'][0])
-        min_x=np.argmin(pos_x)
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            if j==min_x:
-
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=(self.G.number_of_nodes()-1)*self.f
-
-            else:
-
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
-
-    def init_source_pointleaf_R(self):
-
-        pos_x=[]
-        for n in nx.nodes(self.G):
-            pos_x.append(self.G.nodes[n]['pos'][0])
-        max_x=np.argmax(pos_x)
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            if j==max_x:
-
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=(self.G.number_of_nodes()-1)*self.f
-
-            else:
-
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
-
-    def init_source_rootleaf(self):
-
-        diam=int((self.G.number_of_nodes())**0.25)
-        stack=0
-        n_stack=0
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            r_pos=self.G.nodes[keys]['pos']
-            d=np.dot(r_pos,r_pos)
-            if d <= diam :
-                self.G.node[n]['source']=1*self.f
-                self.G.node[n]['color']='#ee2323'
-                self.J[j]=np.exp(-d)*self.G.number_of_nodes()*self.f
-                stack+=self.J[j]
-                n_stack+=1
-
-            else:
-                self.G.node[n]['source']=-1
-                self.G.node[n]['color']='#1eb22f'
-                self.J[j]=-1
-
-        n_stack=self.G.number_of_nodes()-n_stack
-
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            if self.G.node[n]['source']==-1 :
-                self.G.node[n]['source']=-stack*self.f/n_stack
-                self.J[j]=-stack*self.f/n_stack
-
-    def init_source_bilehex(self):
-
-        self.remove_center()
-        N=self.G.number_of_nodes()
-        for i,n in enumerate(nx.nodes(self.G)):
-            #fill the tissue
-            self.J[i]=1*self.f
-            self.G.nodes[n]['source']=1*self.f
-            self.G.nodes[n]['color']='#1eb22f'
-        x=((6. - N)*self.f/6.)
-        for i,n in enumerate(nx.nodes(self.G)):
-            #test whether node is an edgepoint
-            if self.G.degree(n)==3:
-                self.G.nodes[n]['source']=x
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[i]=x
-
-    def init_source_bloodhex(self):
-
-        # self.remove_center()
-        N=self.G.number_of_nodes()
-
-        # if K.stacks == 1:
-        #
-        # for i,n in enumerate(nx.nodes(self..G)):
-        #     #fill the tissue
-        #     # self.J[i]=-1
-        #     # self.G.nodes[n]['source']=-1
-        #     self.J[i]=0.
-        #     self.G.nodes[n]['source']=0.
-        #     self.G.nodes[n]['color']='#1eb22f'
-        x=N*self.f/6.
-        dict_central=nx.betweenness_centrality(self.G)
-        central_sorted=sorted(dict_central,key=dict_central.__getitem__)
-
-        for i,n in enumerate(self.G.nodes()):
-            #test whether node is an edgepoint
-            if self.G.degree(n)==3:
-                self.G.nodes[n]['source']=x
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[i]=x
-            elif n==central_sorted[-1]:
-                self.G.nodes[n]['source']=(-6.)*x
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[i]=(-6.)*x
-            else:
-                self.G.nodes[n]['source']=0.
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[i]=0.
-        self.num_sources=6
-        # x=-arb_add
-        # for i,n in enumerate(nx.nodes(self.G)):
-        #     #test whether node is inner circle
-        #     if self.G.degree(n)==5:
-        #         self.G.nodes[n]['source']+=x
-        #         self.G.nodes[n]['color']='#1eb22f'
-        #         self.J[i]+=x
+    # different functions versus custom function
+    def init_source_custom(self):
+        return 0
 
     def init_source_centralspawn(self):
 
-        dict_central=nx.betweenness_centrality(self.G)
-        central_sorted=sorted(dict_central,key=dict_central.__getitem__)
+        centrality=nx.betweenness_centrality(self.G)
+        centrality_sorted=sorted(centrality,key=centrality.__getitem__)
 
         for j,n in enumerate(self.G.nodes()):
 
-            if n==central_sorted[-1]:
+            if n==centrality_sorted[-1]:
 
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.f
+                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.scales['flow']
                 self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=(self.G.number_of_nodes()-1)*self.f
+                self.nodes['source'][j]=(self.G.number_of_nodes()-1)*self.scales['flow']
 
             else:
 
-                self.G.nodes[n]['source']=-1*self.f
+                self.G.nodes[n]['source']=-1*self.scales['flow']
                 self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
+                self.nodes['source'][j]=-1*self.scales['flow']
 
-    def init_conductivity_plexus(self):
+    def init_source_root_short(self):
 
-        d=np.amax(np.absolute(self.J)) * 0.5
-        M=self.G.number_of_edges()
-        for m in range(M):
+        # check whether geometric layout has been set
+        pos=self.get_pos()
 
-            x=int(0.5+rd.random())
-            sign=(-1)**x
-            self.C[m]+=sign*d*rd.random()
-
-    def init_source_short_distance(self):
-
+        # check for root closests to coordinate origin
         dist={}
-        for j,n in enumerate(self.G.nodes()):
-            dist[n]=np.linalg.norm(self.G.nodes[n]['pos'])
-
+        for n,p in pos.items():
+            dist[n]=np.linalg.norm(p)
         sorted_dist=sorted(dist,key=dist.__getitem__)
 
         for j,n in enumerate(self.G.nodes()):
 
             if n==sorted_dist[0]:
 
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.f
+                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.scales['flow']
                 self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=(self.G.number_of_nodes()-1)*self.f
+                self.nodes['source'][j]=(self.G.number_of_nodes()-1)*self.scales['flow']
 
             else:
 
-                self.G.nodes[n]['source']=-1*self.f
+                self.G.nodes[n]['source']=-1*self.scales['flow']
                 self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
+                self.nodes['source'][j]=-1*self.scales['flow']
 
-    def init_source_long_distance(self):
+    def init_source_root_long(self):
 
+        # check whether geometric layout has been set
+        pos=self.get_pos()
+
+        # check for root closests to coordinate origin
         dist={}
-        for j,n in enumerate(self.G.nodes()):
-            dist[n]=np.linalg.norm(self.G.nodes[n]['pos'])
+        for n,p in pos.items():
+            dist[n]=np.linalg.norm(p)
         sorted_dist=sorted(dist,key=dist.__getitem__,reverse=True)
 
         for j,n in enumerate(self.G.nodes()):
 
             if n==sorted_dist[0]:
 
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.f
+                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.scales['flow']
                 self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=(self.G.number_of_nodes()-1)*self.f
+                self.nodes['source'][j]=(self.G.number_of_nodes()-1)*self.scales['flow']
 
             else:
 
-                self.G.nodes[n]['source']=-1*self.f
+                self.G.nodes[n]['source']=-1*self.scales['flow']
                 self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
-
-    def init_source_max_distance(self):
-
-        dist={}
-        for j,n in enumerate(self.G.nodes()):
-            dist[n]=np.linalg.norm(self.G.nodes[n]['pos'])
-        sorted_dist=sorted(dist,key=dist.__getitem__,reverse=True)
-
-        for j,n in enumerate(self.G.nodes()):
-
-            if n==sorted_dist[0]:
-
-                self.G.nodes[n]['source']=self.G.number_of_nodes()*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=self.G.number_of_nodes()*self.f
-
-            elif n==sorted_dist[-1]:
-
-                self.G.nodes[n]['source']=-(self.G.number_of_nodes())*self.f
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-(self.G.number_of_nodes())*self.f
-
-            else:
-                self.G.nodes[n]['source']=0.
-                self.G.nodes[n]['color']='k'
-                self.J[j]=0.
+                self.nodes['source'][j]=-1*self.scales['flow']
 
     def init_source_terminals(self):
 
@@ -482,6 +323,16 @@ class dynamic_flow_circuit(kirchoff_init.circuit,object):
 
         self.G.graph['sources']=idx_sources
         self.G.graph['potentials']=idx_potential
+
+    def init_conductivity_plexus(self):
+
+        d=np.amax(np.absolute(self.J)) * 0.5
+        M=self.G.number_of_edges()
+        for m in range(M):
+
+            x=int(0.5+rd.random())
+            sign=(-1)**x
+            self.C[m]+=sign*d*rd.random()
 
 class dynamic_flux_circuit(dynamic_flow_circuit,object):
 

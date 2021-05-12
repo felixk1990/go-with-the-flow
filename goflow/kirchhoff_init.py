@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-09T23:32:34+02:00
+# @Last modified time: 2021-05-12T23:07:50+02:00
 # @License: MIT
 
 import networkx as nx
@@ -12,41 +12,39 @@ import sys
 
 def initialize_circuit_from_networkx(input_graph):
 
-    K=circuit()
-    K.G=nx.convert_node_labels_to_integers(input_graph, first_label=0, ordering='default')
-    K.initialize_circuit()
+    kirchhoff_graph=circuit()
+    kirchhoff_graph.default_init(input_graph)
 
-    K.list_graph_nodes=list(K.G.nodes())
-    K.list_graph_edges=list(K.G.edges())
-
-    return K
+    return kirchhoff_graph
 
 class circuit:
 
     def __init__(self):
 
-        self.dict_scales={
+        self.scales={
             'conductance':1,
             'flow':1,
             'length':1
         }
 
-        self.dict_graph={
+        self.graph={
             'graph_mode':'',
             'threshold':0.001,
             'num_sources':1
         }
 
-        self.dict_nodes={
+        self.nodes={
             'source':[],
             'potential':[],
         }
-        self.dict_edges={
+        self.edges={
             'conductivity':[],
             'flow_rate':[],
         }
 
         self.set_graph_containers()
+
+
 
     def set_graph_containers(self):
 
@@ -58,7 +56,13 @@ class circuit:
         self.list_graph_nodes=[]
         self.list_graph_edges=[]
 
-    # custom functions
+    def default_init(self, input_graph):
+
+        self.G=nx.convert_node_labels_to_integers(input_graph, first_label=0, ordering='default')
+        self.initialize_circuit()
+
+        self.list_graph_nodes=list(self.G.nodes())
+        self.list_graph_edges=list(self.G.edges())
 
     def initialize_circuit(self):
 
@@ -71,11 +75,11 @@ class circuit:
         for i,val in enumerate(init_val):
             nx.set_node_attributes(self.G, val , name=init_attributes[i])
 
-        for k in self.dict_nodes.keys():
-            self.dict_nodes[k]=np.zeros(n)
+        for k in self.nodes.keys():
+            self.nodes[k]=np.zeros(n)
 
-        for k in self.dict_edges.keys():
-            self.dict_edges[k]=np.ones(n)
+        for k in self.edges.keys():
+            self.edges[k]=np.ones(e)
 
         self.set_network_attributes()
         print('circuit(): initialized and ready for (some) action :)')
@@ -93,11 +97,12 @@ class circuit:
 
         #set potential node values
         for i,n in enumerate(self.list_graph_nodes):
+
+            self.G.nodes[n]['potential']=self.nodes['potential'][i]
             self.G.nodes[n]['label']=i
-            self.G.nodes[n]['potential']=self.dict_nodes['potential']
         #set conductivity matrix
         for j,e in enumerate(self.list_graph_edges):
-            self.G.edges[e]['conductivity']=self.dict_edges['conductivity']
+            self.G.edges[e]['conductivity']=self.edges['conductivity'][j]
             self.G.edges[e]['label']=j
 
     # clipp small edges & translate conductance into general edge weight
@@ -156,3 +161,20 @@ class circuit:
                 E_SINK+=list(self.edges(e[1]))
 
         return E_ROOT,E_SINK
+
+    # test consistency of conductancies & sources
+    def test_consistency(self):
+
+        self.set_network_attributes()
+        tolerance=0.000001
+        # check value consistency
+        
+        conductivities=np.fromiter(nx.get_edge_attributes(self.G, 'conductivity').values(),float)
+        if len(np.where(conductivities <=0 )[0]) !=0:
+            sys.exit('Error, conductivities negaitve/zero!')
+
+        sources=np.fromiter(nx.get_node_attributes(self.G, 'source').values(),float)
+        if np.sum(sources) > tolerance:
+            sys.exit('Error, input and ouput flows not balanced!')
+        else:
+            print('set_source_landscape(): '+self.graph['graph_mode']+' is set and consistent :)')
