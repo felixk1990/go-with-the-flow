@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-12T23:14:30+02:00
+# @Last modified time: 2021-05-14T19:55:03+02:00
 # @License: MIT
 
 import random as rd
@@ -34,20 +34,29 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
 
         self.graph_mode={
 
-            'centralspawn':self.init_source_centralspawn,
+            'root_centrallity':self.init_source_root_central_centrallity,
+            'root_geometric':self.init_source_root_central_geometric,
             'root_short':self.init_source_root_short,
             'root_long':self.init_source_root_long,
-            'terminals':self.init_source_terminals,
-            'multi_source':self.init_source_multi,
-            'multi_source_cluster':self.init_source_multi_cluster,
-            'terminals_dipole':self.init_source_terminals_dipole,
-            'terminals_monopole':self.init_source_terminals_monopole
-
+            'dipole_border':self.init_source_dipole_border,
+            'dipole_point':self.init_source_dipole_point,
+            'root_multi':self.init_source_root_multi,
+            'custom':self.init_source_custom
         }
 
     # set a certain set of boundary conditions for the given networks
-    def set_source_landscape(self,mode):
+    def set_source_landscape(self,mode,**kwargs):
 
+        # optional keywords
+        if 'num_sources' in kwargs:
+            self.graph['num_sources']= kwargs['num_sources']
+
+        elif 'custom_sources' in kwargs:
+            self.custom= kwargs['custom_sources']
+
+        else:
+            print('Warning: Not recognizing certain keywords')
+        # call init sources
         if mode in self.graph_mode.keys():
 
             self.graph_mode[mode]()
@@ -57,43 +66,34 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
 
         self.test_consistency()
 
-    def get_pos(self):
+    def set_potential_landscape(self,mode):
 
-        pos_key='pos'
-        reset_layout=False
-        for j,n in enumerate(self.G.nodes()):
-            if pos_key not in self.G.nodes[n]:
-                reset_layout=True
-        if reset_layout:
-            print('set networkx.spring_layout()')
-            pos = nx.spring_layout(self.G)
-        else:
-            pos = nx.get_node_attributes(self.G,'pos')
-
-        return pos
+        # todo
+        return 0
 
     # different functions versus custom function
     def init_source_custom(self):
+        # todo
         return 0
 
-    def init_source_centralspawn(self):
+    def init_source_root_central_centrallity(self):
 
         centrality=nx.betweenness_centrality(self.G)
         centrality_sorted=sorted(centrality,key=centrality.__getitem__)
 
-        for j,n in enumerate(self.G.nodes()):
+        self.set_root_leaves_relationship(centrality_sorted[-1])
 
-            if n==centrality_sorted[-1]:
+    def init_source_root_central_geometric(self):
 
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.scales['flow']
-                self.G.nodes[n]['color']='#ee2323'
-                self.nodes['source'][j]=(self.G.number_of_nodes()-1)*self.scales['flow']
+        pos=self.get_pos()
+        X=np.mean(list(pos.values()),axis=0)
 
-            else:
+        dist={}
+        for n in self.list_graph_nodes:
+            dist[n]=np.linalg.norm(np.subtract(X,pos[n]))
+        sorted_dist=sorted(dist,key=dist.__getitem__)
 
-                self.G.nodes[n]['source']=-1*self.scales['flow']
-                self.G.nodes[n]['color']='#1eb22f'
-                self.nodes['source'][j]=-1*self.scales['flow']
+        self.set_root_leaves_relationship(sorted_dist[0])
 
     def init_source_root_short(self):
 
@@ -106,19 +106,7 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
             dist[n]=np.linalg.norm(p)
         sorted_dist=sorted(dist,key=dist.__getitem__)
 
-        for j,n in enumerate(self.G.nodes()):
-
-            if n==sorted_dist[0]:
-
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.scales['flow']
-                self.G.nodes[n]['color']='#ee2323'
-                self.nodes['source'][j]=(self.G.number_of_nodes()-1)*self.scales['flow']
-
-            else:
-
-                self.G.nodes[n]['source']=-1*self.scales['flow']
-                self.G.nodes[n]['color']='#1eb22f'
-                self.nodes['source'][j]=-1*self.scales['flow']
+        self.set_root_leaves_relationship(sorted_dist[0])
 
     def init_source_root_long(self):
 
@@ -131,64 +119,36 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
             dist[n]=np.linalg.norm(p)
         sorted_dist=sorted(dist,key=dist.__getitem__,reverse=True)
 
-        for j,n in enumerate(self.G.nodes()):
+        self.set_root_leaves_relationship(sorted_dist[0])
 
-            if n==sorted_dist[0]:
+    def init_source_dipole_border(self):
 
-                self.G.nodes[n]['source']=((self.G.number_of_nodes()-1))*self.scales['flow']
-                self.G.nodes[n]['color']='#ee2323'
-                self.nodes['source'][j]=(self.G.number_of_nodes()-1)*self.scales['flow']
-
-            else:
-
-                self.G.nodes[n]['source']=-1*self.scales['flow']
-                self.G.nodes[n]['color']='#1eb22f'
-                self.nodes['source'][j]=-1*self.scales['flow']
-
-    def init_source_terminals(self):
-
-        dist=[]
-        adj=[]
-        list_n=list(nx.nodes(self.G))
-        for j,n in enumerate(list_n):
-            p=self.G.nodes[n]['pos']
-            dist.append(np.linalg.norm(p[0]))
-            if j<len(list_n)-1:
-                for i,m in enumerate(list_n[j+1:]):
-                    q=self.G.nodes[m]['pos']
-                    adj.append(np.linalg.norm(np.subtract(p,q)))
-        max_x=np.amax(dist)
-        min_x=np.amin(dist)
-
-        max_idx=np.where(dist==max_x)[0]
-        min_idx=np.where(dist==min_x)[0]
-        madj=np.amin(adj)
-
-        self.initialize_circuit()
-
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            self.G.nodes[n]['source']=0.
-            self.G.nodes[n]['color']='#1eb22f'
-            self.J[j]=0.
-
-        for j in max_idx:
-            n=list_n[j]
-            self.G.nodes[n]['source']=-1*self.f
-            self.G.nodes[n]['color']='#ee2323'
-            self.J[j]=-1.*self.f
-        for j in min_idx:
-            n=list_n[j]
-            self.G.nodes[n]['source']=1*self.f
-            self.G.nodes[n]['color']='#ee2323'
-            self.J[j]=1*self.f
-
-    def init_source_terminals_dipole(self):
-
+        pos=self.get_pos()
         dist={}
-        list_n=list(nx.nodes(self.G))
-        for j,n in enumerate(list_n[:-2]):
-            for i,m in enumerate(list_n[j+1:]):
+        for n,p in pos.items():
+            dist[n]=np.linalg.norm(p)
+
+        vals=list(dist.values())
+        max_x=np.amax(vals)
+        min_x=np.amin(vals)
+
+        max_idx=[]
+        min_idx=[]
+        for k,v in dist.items():
+            if v == max_x:
+                max_idx.append(k)
+
+            elif v == min_x:
+                min_idx.append(k)
+
+        self.set_poles_relationship(max_idx,min_idx)
+
+    def init_source_dipole_point(self):
+
+        pos=self.get_pos()
+        dist={}
+        for j,n in enumerate(self.list_graph_nodes[:-2]):
+            for i,m in enumerate(self.list_graph_nodes[j+1:]):
                 path=nx.shortest_path(self.G,source=n,target=m)
                 dist[(n,m)]=len(path)
         max_len=np.amax(list(dist.values()))
@@ -199,131 +159,67 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
 
         idx=np.random.choice(range(len(push)))
         source,sink=push[idx]
-        for j,n in enumerate(nx.nodes(self.G)):
 
-            if n==source:
+        self.set_poles_relationship([source],[sink])
 
-                self.G.nodes[n]['source']=1*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=1*self.f
+    def init_source_root_multi(self):
 
-            elif n==sink:
+        idx=np.random.choice( self.list_graph_nodes,size=self.graph['num_sources'] )
+        self.node_color=['#ee2323','#1eb22f']
+        self.nodes_source=[self.G.number_of_nodes()/self.graph['num_sources']-1,-1]
 
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=-1.*self.f
+        for j,n in enumerate(self.list_graph_nodes):
 
-            else:
-
-                self.G.nodes[n]['source']=0.
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=0.
-
-    def init_source_terminals_monopole(self):
-
-        dist={}
-        list_n=list(nx.nodes(self.G))
-        X=np.zeros(len(self.G.nodes[list_n[0]]['pos']))
-        for n in list_n:
-            X=np.add(self.G.nodes[n]['pos'],X)
-        X=X/len(list_n)
-        for n in list_n:
-            dist[n]=np.linalg.norm(np.subtract(X,self.G.nodes[n]['pos']))
-        sorted_dist=sorted(dist,key=dist.__getitem__)
-
-
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            if n==sorted_dist[0]:
-
-                self.G.nodes[n]['source']=(nx.number_of_nodes(self.G)-1)*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=(nx.number_of_nodes(self.G)-1)*self.f
-
-            else:
-
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=-1.*self.f
-
-    def init_source_multi(self):
-
-        # dist={}
-        # for j,n in enumerate(self.G.nodes()):
-        #     dist[n]=np.linalg.norm(self.G.nodes[n]['pos'])
-        #
-        # sorted_close=sorted(dist,key=dist.__getitem__)
-        #
-        # sorted_far=sorted(dist,key=dist.__getitem__,reverse=True)
-        idx=np.random.choice( list(self.G.nodes()),size=self.num_sources )
-
-        for j,n in enumerate(self.G.nodes()):
-
-            # if (n==sorted_close[0] or n==sorted_far[0]):
             if n in idx:
 
-                self.G.nodes[n]['source']=1.*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=1.*self.f
+                self.set_source_attributes(j,n,0)
 
             else:
 
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
+                self.set_source_attributes(j,n,1)
 
-    def init_source_multi_cluster(self):
+    # auxillary function for the block above
+    def set_root_leaves_relationship(self,root):
 
+        self.node_color=['#ee2323','#1eb22f']
+        self.nodes_source=[self.G.number_of_nodes()-1,-1]
+        for j,n in enumerate(self.list_graph_nodes):
 
-        idx=np.random.choice( list(self.G.nodes()),size=self.num_sources )
-        dict_nodes={}
-        for j,n in enumerate(self.G.nodes()):
-            dict_nodes[n]=j
-            if n in idx:
-
-                self.G.nodes[n]['source']=1.*self.f
-                self.G.nodes[n]['color']='#ee2323'
-                self.J[j]=1.*self.f
+            if n==root:
+                idx=0
 
             else:
+                idx=1
 
-                self.G.nodes[n]['source']=-1*self.f
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=-1*self.f
+            self.set_source_attributes(j,n,idx)
 
-        for j,n in enumerate(self.G.neighbors(idx[0])):
+    def set_poles_relationship(self,sources,sinks):
 
-            self.G.nodes[n]['source']=1.*self.f
-            self.G.nodes[n]['color']='#ee2323'
-            self.J[dict_nodes[n]]=1.*self.f
+        print(sources)
+        print(sinks)
+        self.node_color=['#ee2323','#ee2323','#1eb22f']
+        self.nodes_source=[1,-1,0]
 
-    def set_terminals_potentials(self,p0):
-        idx_potential=[]
-        idx_sources=[]
-        for j,n in enumerate(nx.nodes(self.G)):
+        for j,n in enumerate(self.list_graph_nodes):
+            self.set_source_attributes(j,n,2)
 
-            if self.G.nodes[n]['source']>0:
+        for i,s in enumerate(sources):
+            for j,n in enumerate(self.list_graph_nodes):
+                if n==s:
+                    self.set_source_attributes(j,s,0)
 
-                self.G.nodes[n]['potential']=1
-                self.G.nodes[n]['color']='#ee2323'
-                self.V[j]=p0
-                idx_potential.append(j)
-            elif self.G.nodes[n]['source']<0:
+        for i,s in enumerate(sinks):
+            for j,n in enumerate(self.list_graph_nodes):
+                if n==s:
+                    self.set_source_attributes(j,s,1)
 
-                self.G.nodes[n]['potential']=0.
-                self.G.nodes[n]['color']='#ee2323'
-                self.V[j]=0.
-                idx_potential.append(j)
-            else:
+    def set_source_attributes(self,j,node,idx):
 
-                self.G.nodes[n]['source']=0.
-                self.G.nodes[n]['color']='#1eb22f'
-                self.J[j]=0.
-                idx_sources.append(j)
+        self.G.nodes[node]['source']=self.nodes_source[idx]*self.scales['flow']
+        self.G.nodes[node]['color']=self.node_color[idx]
+        self.nodes['source'][j]=self.nodes_source[idx]*self.scales['flow']
 
-        self.G.graph['sources']=idx_sources
-        self.G.graph['potentials']=idx_potential
-
+    # todo
     def init_conductivity_plexus(self):
 
         d=np.amax(np.absolute(self.J)) * 0.5

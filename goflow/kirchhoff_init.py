@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-12T23:07:50+02:00
+# @Last modified time: 2021-05-14T19:57:14+02:00
 # @License: MIT
 
 import networkx as nx
@@ -43,7 +43,6 @@ class circuit:
         }
 
         self.set_graph_containers()
-
 
 
     def set_graph_containers(self):
@@ -168,7 +167,7 @@ class circuit:
         self.set_network_attributes()
         tolerance=0.000001
         # check value consistency
-        
+
         conductivities=np.fromiter(nx.get_edge_attributes(self.G, 'conductivity').values(),float)
         if len(np.where(conductivities <=0 )[0]) !=0:
             sys.exit('Error, conductivities negaitve/zero!')
@@ -178,3 +177,34 @@ class circuit:
             sys.exit('Error, input and ouput flows not balanced!')
         else:
             print('set_source_landscape(): '+self.graph['graph_mode']+' is set and consistent :)')
+
+    def get_pos(self):
+
+        pos_key='pos'
+        reset_layout=False
+        for j,n in enumerate(self.G.nodes()):
+            if pos_key not in self.G.nodes[n]:
+                reset_layout=True
+        if reset_layout:
+            print('set networkx.spring_layout()')
+            pos = nx.spring_layout(self.G)
+        else:
+            pos = nx.get_node_attributes(self.G,'pos')
+
+        return pos
+
+    def set_pos(self,pos_data):
+
+        pos_key='pos'
+        reset_layout=False
+        for j,n in enumerate(self.G.nodes()):
+            if pos_key not in self.G.nodes[n]:
+                reset_layout=True
+        if reset_layout:
+            print('set networkx.spring_layout()')
+            pos = nx.spring_layout(self.G)
+            for j,n in enumerate(self.G.nodes()):
+                self.G.nodes[n]=pos[n]
+        else:
+            for j,n in enumerate(self.G.nodes()):
+                self.G.nodes[n]=pos_data[n]
