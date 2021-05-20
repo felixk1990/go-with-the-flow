@@ -3,11 +3,12 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-12T23:07:50+02:00
+# @Last modified time: 2021-05-20T18:47:07+02:00
 # @License: MIT
 
 import networkx as nx
 import numpy as np
+import pandas as pd
 import sys
 
 def initialize_circuit_from_networkx(input_graph):
@@ -28,23 +29,26 @@ class circuit:
         }
 
         self.graph={
-            'graph_mode':'',
+            'source_mode':'',
+            'plexus_mode':'',
             'threshold':0.001,
             'num_sources':1
         }
 
-        self.nodes={
+        self.nodes=pd.DataFrame(
+        {
             'source':[],
             'potential':[],
         }
-        self.edges={
+        )
+
+        self.edges=pd.DataFrame(
+        {
             'conductivity':[],
             'flow_rate':[],
         }
-
+        )
         self.set_graph_containers()
-
-
 
     def set_graph_containers(self):
 
@@ -75,10 +79,10 @@ class circuit:
         for i,val in enumerate(init_val):
             nx.set_node_attributes(self.G, val , name=init_attributes[i])
 
-        for k in self.nodes.keys():
+        for k in self.nodes:
             self.nodes[k]=np.zeros(n)
 
-        for k in self.edges.keys():
+        for k in self.edges:
             self.edges[k]=np.ones(e)
 
         self.set_network_attributes()
@@ -163,18 +167,59 @@ class circuit:
         return E_ROOT,E_SINK
 
     # test consistency of conductancies & sources
-    def test_consistency(self):
+    def test_source_consistency(self):
 
         self.set_network_attributes()
         tolerance=0.000001
         # check value consistency
-        
-        conductivities=np.fromiter(nx.get_edge_attributes(self.G, 'conductivity').values(),float)
-        if len(np.where(conductivities <=0 )[0]) !=0:
-            sys.exit('Error, conductivities negaitve/zero!')
+
 
         sources=np.fromiter(nx.get_node_attributes(self.G, 'source').values(),float)
         if np.sum(sources) > tolerance:
             sys.exit('Error, input and ouput flows not balanced!')
         else:
-            print('set_source_landscape(): '+self.graph['graph_mode']+' is set and consistent :)')
+            print('set_source_landscape(): '+self.graph['source_mode']+' is set and consistent :)')
+
+    def test_conductance_consistency(self):
+
+        self.set_network_attributes()
+        tolerance=0.000001
+        # check value consistency
+
+        conductivities=np.fromiter(nx.get_edge_attributes(self.G, 'conductivity').values(),float)
+        if len(np.where(conductivities <=0 )[0]) !=0:
+            sys.exit('Error, conductivities negaitve/zero!')
+        else:
+            print('set_plexus_landscape(): '+self.graph['plexus_mode']+' is set and consistent :)')
+
+
+    def get_pos(self):
+
+        pos_key='pos'
+        reset_layout=False
+        for j,n in enumerate(self.G.nodes()):
+            if pos_key not in self.G.nodes[n]:
+                reset_layout=True
+        if reset_layout:
+            print('set networkx.spring_layout()')
+            pos = nx.spring_layout(self.G)
+        else:
+            pos = nx.get_node_attributes(self.G,'pos')
+
+        return pos
+
+    def set_pos(self,pos_data):
+
+        pos_key='pos'
+        reset_layout=False
+        for j,n in enumerate(self.G.nodes()):
+            if pos_key not in self.G.nodes[n]:
+                reset_layout=True
+        if reset_layout:
+            print('set networkx.spring_layout()')
+            pos = nx.spring_layout(self.G)
+            for j,n in enumerate(self.G.nodes()):
+                self.G.nodes[n]=pos[n]
+        else:
+            for j,n in enumerate(self.G.nodes()):
+                self.G.nodes[n]=pos_data[n]
