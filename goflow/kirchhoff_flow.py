@@ -3,38 +3,32 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-14T19:55:03+02:00
+# @Last modified time: 2021-05-20T20:53:49+02:00
 # @License: MIT
 
 import random as rd
 import networkx as nx
 import numpy as np
 import sys
-import kirchhoff_init as kirchhoff_init
+import pandas as pd
+import kirchhoff_init
 
 def initialize_flow_circuit_from_networkx(input_graph):
 
-    kirchhoff_graph=dynamic_flow_circuit()
+    kirchhoff_graph=flow_circuit()
     kirchhoff_graph.default_init(input_graph)
 
     return kirchhoff_graph
 
-def initialize_flux_circuit_from_networkx(input_graph):
-
-    kirchhoff_graph=dynamic_flux_circuit()
-    kirchhoff_graph.default_init(input_graph)
-
-    return kirchhoff_graph
-
-
-class dynamic_flow_circuit(kirchhoff_init.circuit,object):
+class flow_circuit(kirchhoff_init.circuit,object):
 
     def __init__(self):
-        super(dynamic_flow_circuit,self).__init__()
 
-        self.graph_mode={
+        super(flow_circuit,self).__init__()
 
-            'root_centrallity':self.init_source_root_central_centrallity,
+        self.source_mode={
+
+            'default':self.init_source_default,
             'root_geometric':self.init_source_root_central_geometric,
             'root_short':self.init_source_root_short,
             'root_long':self.init_source_root_long,
@@ -44,39 +38,58 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
             'custom':self.init_source_custom
         }
 
+        self.plexus_mode={
+
+            'default':self.init_plexus_default,
+            'custom':self.init_plexus_custom,
+
+        }
+
     # set a certain set of boundary conditions for the given networks
-    def set_source_landscape(self,mode,**kwargs):
+    def set_source_landscape(self,mode='default',**kwargs):
 
         # optional keywords
         if 'num_sources' in kwargs:
             self.graph['num_sources']= kwargs['num_sources']
 
-        elif 'custom_sources' in kwargs:
-            self.custom= kwargs['custom_sources']
+        elif 'sources' in kwargs:
+            self.custom= kwargs['sources']
 
-        else:
-            print('Warning: Not recognizing certain keywords')
+        # else:
+        #     print('Warning: Not recognizing certain keywords')
         # call init sources
-        if mode in self.graph_mode.keys():
+        if mode in self.source_mode.keys():
 
-            self.graph_mode[mode]()
+            self.source_mode[mode]()
 
         else :
-            sys.exit('Whooops, Error: Define Input/output-flows for  the network.')
+            sys.exit('Whooops, Error: Define Input/output-flows for the network.')
 
-        self.test_consistency()
+        self.graph['graph_mode']=mode
+        self.test_source_consistency()
 
     def set_potential_landscape(self,mode):
 
         # todo
         return 0
 
-    # different functions versus custom function
+    # different init source functions
     def init_source_custom(self):
-        # todo
-        return 0
 
-    def init_source_root_central_centrallity(self):
+        if len(self.custom.keys())==len(self.list_graph_nodes):
+
+            for j,node in enumerate(self.list_graph_nodes):
+
+                s=self.custom[node]*self.scales['flow']
+                self.G.nodes[node]['source']=s
+                self.nodes['source'][j]=s
+
+        else:
+
+            print('Warning, custom source values ill defined, setting default!')
+            self.init_source_default()
+
+    def init_source_default(self):
 
         centrality=nx.betweenness_centrality(self.G)
         centrality_sorted=sorted(centrality,key=centrality.__getitem__)
@@ -165,7 +178,6 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
     def init_source_root_multi(self):
 
         idx=np.random.choice( self.list_graph_nodes,size=self.graph['num_sources'] )
-        self.node_color=['#ee2323','#1eb22f']
         self.nodes_source=[self.G.number_of_nodes()/self.graph['num_sources']-1,-1]
 
         for j,n in enumerate(self.list_graph_nodes):
@@ -181,7 +193,6 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
     # auxillary function for the block above
     def set_root_leaves_relationship(self,root):
 
-        self.node_color=['#ee2323','#1eb22f']
         self.nodes_source=[self.G.number_of_nodes()-1,-1]
         for j,n in enumerate(self.list_graph_nodes):
 
@@ -195,9 +206,6 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
 
     def set_poles_relationship(self,sources,sinks):
 
-        print(sources)
-        print(sinks)
-        self.node_color=['#ee2323','#ee2323','#1eb22f']
         self.nodes_source=[1,-1,0]
 
         for j,n in enumerate(self.list_graph_nodes):
@@ -216,53 +224,9 @@ class dynamic_flow_circuit(kirchhoff_init.circuit,object):
     def set_source_attributes(self,j,node,idx):
 
         self.G.nodes[node]['source']=self.nodes_source[idx]*self.scales['flow']
-        self.G.nodes[node]['color']=self.node_color[idx]
         self.nodes['source'][j]=self.nodes_source[idx]*self.scales['flow']
 
-    # todo
-    def init_conductivity_plexus(self):
-
-        d=np.amax(np.absolute(self.J)) * 0.5
-        M=self.G.number_of_edges()
-        for m in range(M):
-
-            x=int(0.5+rd.random())
-            sign=(-1)**x
-            self.C[m]+=sign*d*rd.random()
-
-class dynamic_flux_circuit(dynamic_flow_circuit,object):
-
-    def __init__(self):
-        super(dynamic_flux_circuit,self).__init__()
-        self.J_C=[]
-    def set_solute_flux_boundary(self,flux):
-
-        for j,n in enumerate(nx.nodes(self.G)):
-
-            if self.G.nodes[n]['source'] >0:
-                self.J_C[j]=flux
-            elif self.G.nodes[n]['source'] < 0:
-                self.J_C[j]=-flux
-            else:
-                self.J_C[j]=0.
-
-    def initiate_adv_diff_abs_network(self,dict_pars):
-
-        self.threshold=0.01
-        self.set_source_landscape(dict_pars['graph_mode'])
-        self.set_solute_flux_boundary(dict_pars['flux'])
-        self.sum_flux=np.sum( self.J_C[j] for j,n in enumerate(self.G.nodes()) if self.G.nodes[n]['source']>0 )
-        self.C0=dict_pars['c0']
-        self.phi0=dict_pars['phi']*self.sum_flux/nx.number_of_edges(self.G)
-        self.D=dict_pars['D']
-
-        m=nx.number_of_edges(self.G)
-        n=nx.number_of_nodes(self.G)
-        self.beta=np.ones(m)*dict_pars['beta']
-        self.R=np.add(np.ones(m),np.random.rand(m))*dict_pars['R']
-        self.C=np.power(self.R,4)*self.k
-        self.G.graph['conductance']=self.k
-
+    # different init potetnial functions
     def set_terminals_potentials(self,p0):
         idx_potential=[]
         idx_sources=[]
@@ -271,21 +235,59 @@ class dynamic_flux_circuit(dynamic_flow_circuit,object):
             if self.G.nodes[n]['source']>0:
 
                 self.G.nodes[n]['potential']=1
-                self.G.nodes[n]['color']='#ee2323'
                 self.V[j]=p0
                 idx_potential.append(j)
             elif self.G.nodes[n]['source']<0:
 
                 self.G.nodes[n]['potential']=0.
-                self.G.nodes[n]['color']='#ee2323'
                 self.V[j]=0.
                 idx_potential.append(j)
             else:
 
                 self.G.nodes[n]['source']=0.
-                self.G.nodes[n]['color']='#1eb22f'
                 self.J[j]=0.
                 idx_sources.append(j)
 
         self.G.graph['sources']=idx_sources
         self.G.graph['potentials']=idx_potential
+
+    # different init plexus functions
+
+    def set_plexus_landscape(self,mode='default',**kwargs):
+
+        # optional keywords
+
+        if 'plexus' in kwargs:
+            self.custom= kwargs['plexus']
+
+        # call init sources
+        if mode in self.plexus_mode.keys():
+
+            self.plexus_mode[mode]()
+
+        else :
+            sys.exit('Whooops, Error: Define proper conductancies for  the network.')
+
+        self.graph['plexus_mode']=mode
+        self.test_conductance_consistency()
+
+    def init_plexus_default(self):
+
+        # find magnitude of flows and set scale of for conductancies
+        d=np.amax(self.nodes['source']) * 0.5
+        m=self.G.number_of_edges()
+        self.edges['conductivity']=np.multiply(d,np.add(np.ones(m),np.random.rand(m)))
+
+    def init_plexus_custom(self):
+
+        if len(self.custom.keys())==len(self.list_graph_edges):
+            # find magnitude of flows and set scale of for conductancies
+            for j,edge in enumerate(self.list_graph_edges):
+
+                c=self.custom[edge]*self.scales['conductance']
+                self.G.edges[edge]['conductivity']=c
+                self.edges['conductivity'][j]=c
+        else:
+
+            print('Warning, custom source values ill defined, setting default !')
+            self.init_plexus_default()
