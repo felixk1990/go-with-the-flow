@@ -3,17 +3,33 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-20T18:47:07+02:00
+# @Last modified time: 2021-05-22T14:41:08+02:00
 # @License: MIT
 
+# standard types
 import networkx as nx
 import numpy as np
 import pandas as pd
 import sys
 
+# custom embeddings/architectures
+import init_crystal
+# import init_random
+# import init_bilayer
+
+
 def initialize_circuit_from_networkx(input_graph):
 
     kirchhoff_graph=circuit()
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+
+def initialize_circuit_from_crystal(crystal_type='default',periods=1):
+
+    kirchhoff_graph=circuit()
+    input_graph=init_crystal.init_graph_from_crystal(crystal_type,periods)
     kirchhoff_graph.default_init(input_graph)
 
     return kirchhoff_graph
@@ -223,3 +239,11 @@ class circuit:
         else:
             for j,n in enumerate(self.G.nodes()):
                 self.G.nodes[n]=pos_data[n]
+
+    def set_scale_pars(self, new_parameters):
+
+        self.scales=new_parameters
+
+    def set_graph_pars(self, new_parameters):
+
+        self.graph=new_parameters

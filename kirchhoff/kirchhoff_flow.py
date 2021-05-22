@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-20T20:57:34+02:00
+# @Last modified time: 2021-05-22T14:46:34+02:00
 # @License: MIT
 
 import random as rd
@@ -11,8 +11,13 @@ import networkx as nx
 import numpy as np
 import sys
 import pandas as pd
-import kirchhoff_init
+# import kirchhoff_init
+from kirchhoff_init import *
 
+# custom embeddings/architectures
+import init_crystal
+# import init_random
+# import init_bilayer
 def initialize_flow_circuit_from_networkx(input_graph):
 
     kirchhoff_graph=flow_circuit()
@@ -20,8 +25,16 @@ def initialize_flow_circuit_from_networkx(input_graph):
 
     return kirchhoff_graph
 
-class flow_circuit(kirchhoff_init.circuit,object):
+def initialize_flow_circuit_from_crystal(crystal_type='default',periods=1):
 
+    kirchhoff_graph=flow_circuit()
+    input_graph=init_crystal.init_graph_from_crystal(crystal_type,periods)
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+# class flow_circuit(kirchhoff_init.circuit,object):
+class flow_circuit(circuit,object):
     def __init__(self):
 
         super(flow_circuit,self).__init__()

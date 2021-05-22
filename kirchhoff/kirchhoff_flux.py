@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-20T20:57:38+02:00
+# @Last modified time: 2021-05-22T14:10:01+02:00
 # @License: MIT
 
 import random as rd
@@ -11,7 +11,8 @@ import networkx as nx
 import numpy as np
 import sys
 import pandas as pd
-import kirchhoff_flow
+# import kirchhoff_flow
+from kirchhoff_flow import *
 
 def initialize_flux_circuit_from_networkx(input_graph):
 
@@ -31,8 +32,8 @@ def setup_default_flux_circuit(dict_pars):
     self.scales['sum_flux']=np.sum(self.nodes['solute'][idx])
 
 
-class flux_circuit(kirchhoff_flow.flow_circuit,object):
-
+# class flux_circuit(kirchhoff_flow.flow_circuit,object):
+class flux_circuit(flow_circuit,object):
     def __init__(self):
 
         super(flux_circuit,self).__init__()
