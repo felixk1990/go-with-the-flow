@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-22T14:41:08+02:00
+# @Last modified time: 2021-05-23T10:56:45+02:00
 # @License: MIT
 
 # standard types
@@ -14,9 +14,7 @@ import sys
 
 # custom embeddings/architectures
 import init_crystal
-# import init_random
-# import init_bilayer
-
+import init_random
 
 def initialize_circuit_from_networkx(input_graph):
 
@@ -30,6 +28,14 @@ def initialize_circuit_from_crystal(crystal_type='default',periods=1):
 
     kirchhoff_graph=circuit()
     input_graph=init_crystal.init_graph_from_crystal(crystal_type,periods)
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+def initialize_circuit_from_random(random_type='default',periods=10,sidelength=1):
+
+    kirchhoff_graph=circuit()
+    input_graph=init_random.init_graph_from_random(random_type,periods,sidelength)
     kirchhoff_graph.default_init(input_graph)
 
     return kirchhoff_graph
@@ -126,7 +132,6 @@ class circuit:
             self.G.edges[e]['label']=j
 
     # clipp small edges & translate conductance into general edge weight
-
     def clipp_graph(self):
 
         #cut out edges which lie beneath a certain threshold value and export this clipped structure
@@ -207,7 +212,6 @@ class circuit:
             sys.exit('Error, conductivities negaitve/zero!')
         else:
             print('set_plexus_landscape(): '+self.graph['plexus_mode']+' is set and consistent :)')
-
 
     def get_pos(self):
 

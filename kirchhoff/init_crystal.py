@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-22T16:31:47+02:00
+# @Last modified time: 2021-05-23T15:14:10+02:00
 # @License: MIT
 import networkx as nx
 import numpy as np
@@ -28,15 +28,19 @@ class networkx_crystal():
     def __init__(self):
         self.dict_cells={  }
         self.G=nx.Graph()
+        self.lattice_constant=1
+        self.translation_length=1
 
     # construct one of the following crystal topologies
     def lattice_translation(self,t,T):
+
         D=nx.Graph()
         for n in T.nodes():
             D.add_node(tuple(n+t),pos=T.nodes[n]['pos']+t)
+
         return D
 
-    def periodic_cell_structure(self,cell,num_periods,lattice_constant,translation_length):
+    def periodic_cell_structure(self,cell,num_periods):
 
         DL=nx.Graph()
 
@@ -47,7 +51,7 @@ class networkx_crystal():
         for i in periods[0]:
             for j in periods[1]:
                 for k in periods[2]:
-                    TD=self.lattice_translation(translation_length*np.array([i,j,k]),cell)
+                    TD=self.lattice_translation(self.translation_length*np.array([i,j,k]),cell)
                     DL.add_nodes_from(TD.nodes(data=True))
                     self.dict_cells[(i,j,k)]=list(TD.nodes())
 
@@ -55,7 +59,7 @@ class networkx_crystal():
         for i,n in enumerate(list_n[:-1]):
             for m in list_n[(i+1):]:
                 dist=np.linalg.norm(DL.nodes[tuple(n)]['pos']-DL.nodes[tuple(m)]['pos'])
-                if dist==lattice_constant:
+                if dist==self.lattice_constant:
                     DL.add_edge(tuple(n),tuple(m),slope=(DL.nodes[tuple(n)]['pos'],DL.nodes[tuple(m)]['pos']))
 
         dict_nodes={}
@@ -80,10 +84,14 @@ class networkx_crystal():
 # 3D
 class networkx_simple(networkx_crystal,object):
 
+
     def __init__(self, num_periods):
 
         super(networkx_simple,self).__init__()
+        self.lattice_constant=1.
+        self.translation_length=1.
         self.simple_cubic_lattice(num_periods)
+
     #construct full triangulated hex grid as skeleton
     def simple_unit_cell(self):
 
@@ -97,20 +105,8 @@ class networkx_simple(networkx_crystal,object):
 
     def simple_cubic_lattice(self,num_periods):
 
-        #construct single box
-        lattice_constant=1.
-        translation_length=1.
         D=self.simple_unit_cell()
-        self.periodic_cell_structure(D,num_periods,lattice_constant,translation_length)
-
-    def simple_chain(self,num_periods):
-
-        #construct single box
-        lattice_constant=1.
-        for i in range(num_periods):
-          self.G.add_node(i, pos=np.array([i,0,0]),label=self.count_n())
-        for i in range(num_periods-1):
-          self.G.add_edge(i+1,i, label=self.count_e(),slope=(self.G.nodes[i+1]['pos'],self.G.nodes[i]['pos']))
+        self.periodic_cell_structure(D,num_periods)
 
 class networkx_chain(networkx_crystal,object):
 
@@ -122,7 +118,6 @@ class networkx_chain(networkx_crystal,object):
     def simple_chain(self,num_periods):
 
         #construct single box
-        lattice_constant=1.
         for i in range(num_periods):
           self.G.add_node(i, pos=np.array([i,0,0]))
         for i in range(num_periods-1):
@@ -132,9 +127,12 @@ class networkx_bcc(networkx_crystal,object):
 
     def __init__(self, num_periods):
         super(networkx_bcc,self).__init__()
+        self.lattice_constant=np.sqrt(3.)/2.
+        self.translation_length=1.
         self.simple_bcc_lattice( num_periods)
 
     def bcc_unit_cell(self):
+
         D=nx.Graph()
         for i in [0,1]:
             for j in [0,1]:
@@ -146,18 +144,20 @@ class networkx_bcc(networkx_crystal,object):
     def simple_bcc_lattice(self,n):
 
         #construct single box
-        lattice_constant=np.sqrt(3.)/2.
-        translation_length=1.
+
         D=self.bcc_unit_cell()
-        self.periodic_cell_structure(D,n,lattice_constant,translation_length)
+        self.periodic_cell_structure(D,n)
 
 class networkx_fcc(networkx_crystal,object):
 
     def __init__(self, num_periods):
         super(networkx_fcc,self).__init__()
+        self.lattice_constant=np.sqrt(2.)/2.
+        self.translation_length=1.
         self.simple_fcc_lattice( num_periods)
 
     def fcc_unit_cell(self):
+
         D=nx.Graph()
         for i in [0,1]:
             for j in [0,1]:
@@ -174,9 +174,6 @@ class networkx_fcc(networkx_crystal,object):
 
     def simple_fcc_lattice(self,n):
 
-        #construct spine
-        lattice_constant=np.sqrt(2.)/2.
-        translation_length=1.
         D=self.fcc_unit_cell()
         self.periodic_cell_structure(D,n,lattice_constant,translation_length)
 
@@ -184,6 +181,8 @@ class networkx_diamond(networkx_crystal,object):
 
     def __init__(self, num_periods):
         super(networkx_diamond,self).__init__()
+        self.lattice_constant=np.sqrt(3.)/2.
+        self.translation_length=2.
         self.diamond_lattice(num_periods)
 
     def diamond_unit_cell(self):
@@ -206,17 +205,14 @@ class networkx_diamond(networkx_crystal,object):
 
     def diamond_lattice(self,num_periods):
 
-        self.dict_cells={  }
-
-        lattice_constant=np.sqrt(3.)/2.
-        translation_length=2.
         D=self.diamond_unit_cell()
-        self.periodic_cell_structure(D,num_periods,lattice_constant,translation_length)
+        self.periodic_cell_structure(D,num_periods)
 
 class networkx_laves(networkx_crystal,object):
 
     def __init__(self, num_periods):
         super(networkx_laves,self).__init__()
+        self.lattice_constant=2.
         self.laves_lattice(num_periods)
 
     def laves_lattice(self,num_periods):
@@ -230,7 +226,7 @@ class networkx_laves(networkx_crystal,object):
             periods=[range(num_periods[0]),range(num_periods[1]),range(num_periods[2])]
         else:
             periods=[range(num_periods),range(num_periods),range(num_periods)]
-        lattice_constant=2.
+
         fundamental_points=[[0,0,0],[1,1,0],[1,2,1],[0,3,1],[2,2,2],[3,3,2],[3,0,3],[2,1,3]]
         for l,fp in enumerate(fundamental_points):
             for i in periods[0]:
@@ -252,7 +248,7 @@ class networkx_laves(networkx_crystal,object):
 
                       v=np.subtract(n,m)
                       dist=np.dot(v,v)
-                      if dist==lattice_constant:
+                      if dist==self.lattice_constant:
                           H.add_edge(n,m,slope=(G_aux.nodes[n]['pos'],G_aux.nodes[m]['pos']))
 
         dict_nodes={}

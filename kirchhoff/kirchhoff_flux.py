@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: go-with-the-flow
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-05-22T14:10:01+02:00
+# @Last modified time: 2021-05-23T18:18:07+02:00
 # @License: MIT
 
 import random as rd
@@ -13,10 +13,28 @@ import sys
 import pandas as pd
 # import kirchhoff_flow
 from kirchhoff_flow import *
+import init_crystal
+import init_random
 
 def initialize_flux_circuit_from_networkx(input_graph):
 
     kirchhoff_graph=flux_circuit()
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+def initialize_flux_circuit_from_random(random_type='default',periods=10,sidelength=1):
+
+    kirchhoff_graph=flux_circuit()
+    input_graph=init_random.init_graph_from_random(random_type,periods,sidelength)
+    kirchhoff_graph.default_init(input_graph)
+
+    return kirchhoff_graph
+
+def initialize_flux_circuit_from_crystal(crystal_type='default',periods=1):
+
+    kirchhoff_graph=flux_circuit()
+    input_graph=init_crystal.init_graph_from_crystal(crystal_type,periods)
     kirchhoff_graph.default_init(input_graph)
 
     return kirchhoff_graph
@@ -49,8 +67,8 @@ class flux_circuit(flow_circuit,object):
 
         self.solute_mode={
 
-            'default':self.init_source_root_central_centrallity,
-            'custom':self.init_source_custom
+            'default':self.init_solute_default,
+            'custom':self.init_solute_custom
         }
 
     def set_solute_landscape(self, mode='default', **kwargs):
