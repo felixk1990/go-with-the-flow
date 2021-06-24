@@ -50,7 +50,7 @@ class morph_ds( gi.morph, object ):
 
     def solve_fw_euler(self,ds_func, x0 , **kwargs):
 
-        t_samples=np.arrange(0,kwargs['num_steps'],step=kwargs['sample_rate'],endpoint=True)*kwargs['step']
+        t_samples=np.arange(0,kwargs['num_steps'],step=kwargs['sample_rate'])*kwargs['step']
         sol=np.zeros((kwargs['samples'],len(x0)))
         c_m=0
         x_0=np.array(x0)
