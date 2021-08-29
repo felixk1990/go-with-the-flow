@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: phd_network_remodelling
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-06-24T11:10:24+02:00
+# @Last modified time: 2021-06-25T17:44:43+02:00
 
 import scipy.integrate as si
 import goflow.init_ivp as gi
@@ -18,11 +18,12 @@ class morph_ds( gi.morph, object ):
 
         self.options={
             'method':'LSODA',
-            'args':( [self.flow] )
+            'atol':1e-10,
+            'args':( self.flow )
         }
         for k,v in kwargs.items():
-            if k in options:
-                self.options[k]=v
+            # if k in self.options:
+            self.options[k]=v
 
         nsol=si.solve_ivp(ds_func, t_span ,x0 , **self.options)
 
