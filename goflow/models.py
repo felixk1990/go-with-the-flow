@@ -3,62 +3,105 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: phd_network_remodelling
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-06-25T19:26:12+02:00
+# @Last modified time: 2021-09-05T00:29:15+02:00
 
 import numpy as np
+import kirchhoff.circuit_flow as kfc
+import hailhydro.flow_init as hfi
 
 # custom
-
-from init_ivp import *
-from ivp_opt import *
-from ivp_ds import *
-
-def init_custom_adaptation(flow_type,morph_mode='default',**kwargs):
+from goflow.init_ivp import *
 
 
-    if morph_mode=='default':
-        IM=morph_ds(flow_type)
-        MR=murray(IM)
-        if 'sys_pars' in kwargs:
-            MR.set_system_parameters(kwargs['sys_pars'])
-        if 'solv_opt' in kwargs:
-            MR.set_solver_options(kwargs['solv_opt'])
+def init(mode='default',**kwargs):
 
-    return MR
+    model_mode={
+        'default': murray,
+        'murray': murray,
 
-class murray():
+    }
 
-    def __init__(self, morph):
+    if mode=='default':
+        model=model_mode['default'](**kwargs)
+    else:
+        model=model_mode[mode](**kwargs)
 
-        self.morph=morph
-        self.null_decimal=30
-        self.jac=False
+    return model
 
-        self.pars={
+def initialize_flow_on_crystal(dict_pars):
+
+    circuit=kfc.initialize_flow_circuit_from_crystal(crystal_type=dict_pars['type'],periods=dict_pars['periods'])
+    circuit.set_source_landscape(dict_pars['source'])
+    circuit.set_plexus_landscape(dict_pars['plexus'])
+    flow=hfi.initialize_flow_on_circuit(circuit)
+
+    return flow
+# def init_custom_adaptation(flow_type,morph_mode='default',**kwargs):
+#
+#
+#     if morph_mode=='default':
+#         IM=morph_dynamic(flow_type)
+#         MR=murray(IM)
+#         if 'sys_pars' in kwargs:
+#             MR.set_system_parameters(kwargs['sys_pars'])
+#         if 'solv_opt' in kwargs:
+#             MR.set_solver_options(kwargs['solv_opt'])
+#
+#     return MR
+
+class model():
+
+    def __init__(self):
+
+        self.ivp_options={
             't0': 0.,
             't1': 1.,
-            'x0': np.power(self.morph.flow.circuit.edges['conductivity']/self.morph.flow.circuit.scales['conductance'],0.25),
-            'alpha_0': 1.,
-            'alpha_1': 1.,
-            'flow_type':self.morph.flow
+            'x0':1,
+            'num':100,
         }
 
+        self.model_args=[]
         self.solver_options={
-            't_eval':np.linspace(self.pars['t0'],self.pars['t1'],num=100),
-            'events':murray.flatlining,
-            'args': (self.morph.flow,self.pars['alpha_0'],self.pars['alpha_1'])
+            't_eval':np.linspace(self.ivp_options['t0'],self.ivp_options['t1'],num=self.ivp_options['num'])
         }
 
-    def set_system_parameters(self,sys_pars):
 
-        for k,v in sys_pars.items():
 
-            self.pars[k]=v
-            if 't_0' == k or 't_1' == k:
-                self.solver_options['t_eval']=np.linspace(self.pars['t0'],self.pars['t1'],num=self.samples)
+class murray(model, object):
 
-            if 'alpha_0' == k or 'alpha_1' == k or 'flow_type':
-                self.solver_options['args'] = (self.pars['flow_type'],self.pars['alpha_0'],self.pars['alpha_1'])
+    def __init__(self,**kwargs):
+
+        self.null_decimal=30
+        self.jac=False
+        super(murray,self).__init__()
+
+        self.events={
+                'default':self.flatlining_default,
+                'dynamic':self.flatlining_dynamic,
+            }
+        self.model_args=[1.,1.]
+        self.solver_options.update({ 'events':'default'})
+        if 'pars' in kwargs:
+            self.set_model_parameters(kwargs['pars'])
+
+    def update_event_func(self):
+
+        try:
+            self.solver_options['events']=self.events[self.solver_options['events']]
+
+        except:
+            print('Warning: Event handling got inadequadt event functin, falling back to default')
+            self.solver_options['events']=self.events['default']
+
+    def set_model_parameters(self,model_pars):
+
+        for k,v in model_pars.items():
+
+            if 'alpha_0' == k :
+                self.model_args[0]=v
+
+            if 'alpha_1' == k :
+                self.model_args[1]=v
 
     def set_solver_options(self,solv_opt):
 
@@ -66,7 +109,9 @@ class murray():
 
             self.solver_options[k]=v
 
-    def flatlining(self,  t,  x_0,  *args):
+        self.update_event_func()
+
+    def flatlining_default(self,  t,  x_0,  *args):
 
         flow, alpha_1, alpha_2 = args
 
@@ -79,10 +124,10 @@ class murray():
 
         return z
 
-    flatlining.terminal= True
-    flatlining.direction = -1
+    flatlining_default.terminal= True
+    flatlining_default.direction = -1
 
-    def flatlining_ds(self,  t,  x_0,  *args):
+    def flatlining_dynamic(self,  t,  x_0,  *args):
 
         flow, alpha_1, alpha_2 = args
 
@@ -93,11 +138,11 @@ class murray():
         quality=np.round( np.linalg.norm(rel_r)  ,self.null_decimal  )
 
         z=  quality   -   np.power(10.,-(self.null_decimal-1))
-    
+
         return z
 
-    flatlining_ds.terminal= True
-    flatlining_ds.direction = -1
+    flatlining_dynamic.terminal= True
+    flatlining_dynamic.direction = -1
 
     def calc_update_stimuli(self,t,x_0, *args):
 
@@ -118,7 +163,7 @@ class murray():
 
         x_sq,p_sq,k,src=self.get_stimuli_pars(flow,x_0)
 
-        f1= alpha_1*np.multiply( p_sq,np.power(x_sq,2))
+        f1= alpha_1*np.multiply( p_sq, np.power(x_sq,2))
         f2= alpha_0 *x_sq
         F = np.sum( np.add( f1  , f2 ))
 
@@ -141,11 +186,6 @@ class murray():
 
         return x_sq,p_sq,k,src
 
-    def propagate_ds(self):
-
-        nsol=self.morph.propagate_ds(self.calc_update_stimuli,(self.pars['t0'],self.pars['t1']),self.pars['x0'], **self.solver_options)
-
-        return nsol
 # class corson(murray, object):
 #     pass
 
