@@ -15,7 +15,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="goflow", # Replace with your own username
-    version="0.0.5",
+    version="0.1.1",
     author="felixk1990",
     author_email="felixuwekramer@protonmail.com",
     description="Collection of tools for computation of flows and and fluxes on Kirchhoff circuits and their corresponding adaptation. ",

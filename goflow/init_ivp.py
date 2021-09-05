@@ -3,12 +3,17 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: phd_network_remodelling
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-09-04T23:45:10+02:00
+# @Last modified time: 2021-09-05T13:22:01+02:00
 
 import numpy as np
 import scipy.optimize as sc
 import scipy.integrate as si
 # general initial value problem for network morpgogenesis
+
+class proxy_solver():
+    def __init__(self,t_samples,sol):
+        self.t= t_samples
+        self.y=sol.transpose()
 
 class morph(  ):
 
@@ -55,23 +60,21 @@ class morph_dynamic( morph, object ):
 
         return nsol
 
-    def nsolve_fw_euler(self,ds_func,x0, **kwargs):
+    def nsolve_custom(self,ds_func,x0, **kwargs):
 
         self.options={
             'num_steps':1,
             'samples':1,
             'step':1,
-            'args': [self.flow]
         }
         for k,v in kwargs.items():
-            if k in options:
-                self.options[k]=v
+            self.options[k]=v
 
-        ns,sr = self.set_integration_scale(self.options['num_steps',self.options['samples']])
+        ns,sr = self.set_integration_scale(self.options['num_steps'],self.options['samples'])
         self.options['sample_rate']=sr
         self.options['num_steps']=ns
 
-        nsol=solve_fw_euler(ds_func ,x0 , **self.options)
+        nsol=self.nsolve_fw_euler(ds_func ,x0 , **self.options)
 
         return nsol
 
@@ -90,14 +93,16 @@ class morph_dynamic( morph, object ):
                     sol[c_m]=x_0[:]
                     c_m+=1
 
-                dx=ds_func(i*kwargs['step'],x_0,args=kwargs['args'])
+                dx=ds_func(i*kwargs['step'],x_0,*kwargs['args'])
                 x_0=np.add(x_0,dx*kwargs['step'])
 
             except:
                 print('Warning: Ending integration due to bad numerics....find out more at ...')
                 break
 
-        return [t_sample,sol]
+        nsol=proxy_solver(t_samples,sol)
+
+        return nsol
 
     def set_integration_scale(self,Num_steps,sample):
 
