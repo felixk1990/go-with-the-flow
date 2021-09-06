@@ -9,7 +9,7 @@ What does it do: Modelling morphogenesis of capillary networks which can be mode
 
 The dynamic system f is usually constructed for a Lyapunov function L with <br>
 
-<img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 dp_i^2r_i^4 + \alpha_0 r_i^2+...">
+<img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 dp_i^2r_i^4 %2B \alpha_0 r_i^2 %2B+...">
 
 such that we get <br>
 <img src="https://render.githubusercontent.com/render/math?math=f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... )= -\frac{dL}{dr_i} ">
@@ -88,11 +88,11 @@ fig.show()
 ##  Gallery
 
 ## Acknowledgement
-Models presentend and implemented as given in 
-
-Katifori et al, Damage and Fluctuations Induce Loops in Optimal Transport Networks, 2010
-Corson, Fluctuations and Redundancy in Optimal Transport Networks, 2010
-Hu and Cai, Adaptation and Optimization of Biological Transport Networks, 2013
-Kramer and Modes, How to pare a pair: Topology control and pruning in intertwined complex networks, 2020
+* Pre-customized models presentend and implemented here as given by:
+    *  Murray, The Physiological Principle of Minimum Work, 1926
+    *  Katifori et al, Damage and Fluctuations Induce Loops in Optimal Transport Networks, 2010
+    *  Corson, Fluctuations and Redundancy in Optimal Transport Networks, 2010
+    *  Hu and Cai, Adaptation and Optimization of Biological Transport Networks, 2013
+    *  Kramer and Modes, How to pare a pair: Topology control and pruning in intertwined complex networks, 2020
 
 ```goflow``` written by Felix Kramer
