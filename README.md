@@ -23,7 +23,7 @@ import numpy as np
 import goflow.init_ivp as gi
 import goflow.models as gfm
 
-#initialize circuit+flow pattern
+#initialize circuit+flow pattern on a simple grid, using hagen-poiseuille flow, sources/sinks at the periphery, randomize initial vessel radii
 cfp={
     'type': 'hexagonal',
     'periods': 3,
@@ -31,21 +31,6 @@ cfp={
     'plexus':'default',
 }
 flow=gfm.initialize_flow_on_crystal(cfp)
-
-#set model and model parameters
-mp={
-    'alpha_0':1,
-    'alpha_1':1.
-}
-murray=gfm.init(model='murray',pars=mp)
-
-#initialize dynamic system and set integration parameters
-morpheus=gi.morph_dynamic(flow=flow,model=murray)   
-sp={
-    't0': 0.,
-    't1': 5.5,
-    'x0': np.power(morpheus.flow.circuit.edges['conductivity']/morpheus.flow.circuit.scales['conductance'],0.25),
-}
 
 #plot initial network with data of choice
 flow.circuit.draw_weight_scaling=2.
@@ -55,6 +40,22 @@ fig.show()
 ![plexus](./gallery/plexus_murray.png)
 
 ```
+#set model and model parameter, here for example go for the classic Murray model (1926)
+mp={
+    'alpha_0':1,
+    'alpha_1':1.
+}
+murray=gfm.init(model='murray',pars=mp)
+
+#initialize dynamic system and set integration parameters
+morpheus=gi.morph_dynamic(flow=flow,model=murray)   
+k=morpheus.flow.circuit.edges['conductivity']/morpheus.flow.circuit.scales['conductance']
+sp={
+    't0': 0.,
+    't1': 5.5,
+    'x0': np.power(k,0.25),
+}
+
 #numerically evaluate the system
 nsol=morpheus.nsolve(murray.calc_update_stimuli,(sp['t0'],sp['t1']),sp['x0'], **murray.solver_options)
 murray.jac=False
