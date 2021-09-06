@@ -2,6 +2,19 @@
 This repository is all about simulating flow driven pruning in biological flow networks. 
 ##  Introduction
 This module 'goflow' is the final of a series of pyton packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and dependends on the packages 'kirchhoff','hailhydro'.
+
+What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br>
+
+<img src="https://render.githubusercontent.com/render/math?math=\dot{r}_i (t) = f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... ) ">
+
+The dynamic system f is usually constructed for a Lyapunov function L with <br>
+
+<img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 dp_i^2r_i^4 + \alpha_0 r_i^2+...">
+
+such that we get <br>
+<img src="https://render.githubusercontent.com/render/math?math=f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... )= -\frac{dL}{dr_i} ">
+
+The package not only includes premade Lyapunov functions and flow/flux models but further offers custom functions to be provided by the user.
 ##  Installation
 pip install goflow
 ##  Usage
@@ -22,7 +35,7 @@ flow=gfm.initialize_flow_on_crystal(cfp)
 #set model and model parameters
 mp={
     'alpha_0':1,
-    'alpha_0':1.
+    'alpha_1':1.
 }
 murray=gfm.init(model='murray',pars=mp)
 
@@ -75,4 +88,11 @@ fig.show()
 ##  Gallery
 
 ## Acknowledgement
+Models presentend and implemented as given in 
+
+Katifori et al, Damage and Fluctuations Induce Loops in Optimal Transport Networks, 2010
+Corson, Fluctuations and Redundancy in Optimal Transport Networks, 2010
+Hu and Cai, Adaptation and Optimization of Biological Transport Networks, 2013
+Kramer and Modes, How to pare a pair: Topology control and pruning in intertwined complex networks, 2020
+
 ```goflow``` written by Felix Kramer
