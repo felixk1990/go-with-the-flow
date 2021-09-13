@@ -3,7 +3,7 @@
 # @Email:  kramer@mpi-cbg.de
 # @Project: phd_network_remodelling
 # @Last modified by:    Felix Kramer
-# @Last modified time: 2021-09-05T13:22:01+02:00
+# @Last modified time: 2021-09-08T20:54:23+02:00
 
 import numpy as np
 import scipy.optimize as sc
@@ -32,7 +32,7 @@ class morph(  ):
             self.link_model_flow()
 
     def link_model_flow(self):
-        self.model.solver_options.update({'args': (self.flow,self.model.model_args[0],self.model.model_args[1]) })
+        self.model.solver_options.update({'args': (self.flow,*self.model.model_args) })
         self.model.update_event_func()
 
 class morph_dynamic( morph, object ):
@@ -87,7 +87,7 @@ class morph_dynamic( morph, object ):
 
         for i in range(kwargs['num_steps']):
 
-            try:
+            # try:
 
                 if (i % kwargs['sample_rate'] )==0:
                     sol[c_m]=x_0[:]
@@ -96,9 +96,9 @@ class morph_dynamic( morph, object ):
                 dx=ds_func(i*kwargs['step'],x_0,*kwargs['args'])
                 x_0=np.add(x_0,dx*kwargs['step'])
 
-            except:
-                print('Warning: Ending integration due to bad numerics....find out more at ...')
-                break
+            # except:
+            #     print('Warning: Ending integration due to bad numerics....find out more at ...')
+            #     break
 
         nsol=proxy_solver(t_samples,sol)
 
