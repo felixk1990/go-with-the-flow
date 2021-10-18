@@ -9,7 +9,7 @@ What does it do: Modelling morphogenesis of capillary networks which can be mode
 
 The dynamic system f is usually constructed for a Lyapunov function L with <br>
 
-<img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 dp_i^2r_i^4 %2B \alpha_0 r_i^2 %2B+...">
+<img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 p_i^2r_i^4 %2B \alpha_0 r_i^2 %2B+...">
 
 such that we get <br>
 <img src="https://render.githubusercontent.com/render/math?math=f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... )= -\frac{dL}{dr_i} ">
@@ -40,10 +40,10 @@ fig.show()
 ![plexus](./gallery/plexus_murray.png)
 
 ```
-#set model and model parameter, here for example go for the classic Murray model (1926)
+#set model and its parameters, here for example go for the classic Murray model (1926)
 mp={
-    'alpha_0':1,
-    'alpha_1':1.
+    'alpha_0':1, #volume cost
+    'alpha_1':1. #dissipation cost
 }
 murray=gfm.init(model='murray',pars=mp)
 
