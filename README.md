@@ -18,12 +18,13 @@ The package not only includes premade Lyapunov functions and flow/flux models bu
 ##  Installation
 pip install goflow
 ##  Usage
+First you have to create your rudimentary circuit/ flow network which yu want to evolve later:
 ```
 import numpy as np
 import goflow.init_ivp as gi
 import goflow.models as gfm
 
-#initialize circuit+flow pattern on a simple grid, using hagen-poiseuille flow, sources/sinks at the periphery, randomize initial vessel radii
+# #initialize circuit+flow pattern
 cfp={
     'type': 'hexagonal',
     'periods': 3,
@@ -31,61 +32,69 @@ cfp={
     'plexus':'default',
 }
 flow=gfm.initialize_flow_on_crystal(cfp)
+flow.circuit.nodes['label'] = [n for n in flow.circuit.G.nodes()]
+flow.circuit.edges['label'] = [e for e in flow.circuit.G.edges()]
 
-#plot initial network with data of choice
+# plot initial network with data of choice
 flow.circuit.draw_weight_scaling=2.
-fig=flow.circuit.plot_circuit({'width':'conductivity'})
+fig=flow.circuit.plot_circuit()
 fig.show()
 ```
 ![plexus](./gallery/plexus_murray.png)
 
+Next you have to set the dynamical model (how are flows calculated, vessels adjusted during each adaptation step):
 ```
 #set model and its parameters, here for example go for the classic Murray model (1926)
+
+# set model and model parameters
 mp={
-    'alpha_0':1, #volume cost
-    'alpha_1':1. #dissipation cost
+    'alpha_0':1,
+    'alpha_1':1.
 }
 murray=gfm.init(model='murray',pars=mp)
 
-#initialize dynamic system and set integration parameters
+# initialize dynamic system and set integration parameters
 morpheus=gi.morph_dynamic(flow=flow,model=murray)   
-k=morpheus.flow.circuit.edges['conductivity']/morpheus.flow.circuit.scales['conductance']
 sp={
     't0': 0.,
     't1': 5.5,
-    'x0': np.power(k,0.25),
+    'x0': np.power(morpheus.flow.circuit.edges['conductivity']/morpheus.flow.circuit.scales['conductance'],0.25),
 }
 
 #numerically evaluate the system
 nsol=morpheus.nsolve(murray.calc_update_stimuli,(sp['t0'],sp['t1']),sp['x0'], **murray.solver_options)
-murray.jac=False
 cost=[murray.calc_cost_stimuli(t,y,*murray.solver_options['args']) for t,y in zip(nsol.t,nsol.y.transpose())]
-
+```
+When you are done, plot dynamics of vessel development and the final structures. 
+```
 #plot dynamic data such as radii and costs
-import matplotlib.pyplot as plt
-fig,axs=plt.subplots(2,1,figsize=(12,6),sharex=True)
-axs[0].plot(nsol.t,nsol.y.transpose(),alpha=0.1,color='b')
-axs[1].plot(nsol.t,cost,alpha=0.2,color='b')
+import plotly.graph_objects as go
 
-for i in range(2):
-    axs[i].grid(True)
-    
-axs[1].set_xlabel(r'time $t$')
-axs[0].set_ylabel(r'radii $r$')
-axs[1].set_ylabel(r'metabolic cost $\Gamma$')
-plt.show()
-
-#plot network with data of choice
-flow.circuit.edges['conductivity']=nsol.y.transpose()[-1]
-flow.circuit.edges['flow_rate']=flow.calc_configuration_flow()
-flow.circuit.draw_weight_scaling=2.
-fig=flow.circuit.plot_circuit({'width':'conductivity'})
+cl='rgba(0,0,255,.1)'
+names = [str(s) for s in list(flow.circuit.G.edges())]
+fig = go.Figure()
+for i, c in enumerate(nsol.y):
+    fig.add_trace(go.Scatter(x=nsol.t, y=c, mode='lines', name=names[i], line={'color': cl}))
 fig.show()
 ```
-![dynamics](./gallery/dynamics_murray.png)
-![updated](./gallery/updated_murray.png)
+![dynamics](./gallery/dynamics_murray.png)<br>
+You can customize what the interactive plots display:
+```
+# plot final network
+flow.circuit.edges['conductivity']=nsol.y.transpose()[-1]*3.
+fig=flow.circuit.plot_circuit(linewidth=[flow.circuit.edges['conductivity']])
+fig.show()
+
+# plot network with data of choice
+Q, dP = flow.calc_configuration_flow()
+flow.circuit.edges['flow_rate'], dP=flow.calc_configuration_flow()
+fig=flow.circuit.plot_circuit('flow_rate', color_edges=[np.absolute(Q)], linewidth=[flow.circuit.edges['conductivity']])
+fig.show()
+```
+![updated1](./gallery/updated_murray1.png)
+![updated2](./gallery/updated_murray2.png)
 ##  Requirements
-``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```
+``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
 
 ## Acknowledgement
