@@ -24,6 +24,7 @@ def init(mode = 'default', **kwargs):
 
     if mode in model_mode:
         model = model_mode[mode](**kwargs)
+
     else:
         model = model_mode['default'](**kwargs)
         print('Warning: Unknown model, set default: Murray')
@@ -182,7 +183,7 @@ class murray(model, object):
         x_sq = flow.calc_cross_section_from_conductivity( conductivity, k)
         p_sq, q_sq =flow.calc_sq_flow( conductivity, src)
 
-        return x_sq, p_sq, k
+        return x_sq, p_sq
 
 class corson(murray, object):
 

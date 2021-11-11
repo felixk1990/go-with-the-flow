@@ -137,7 +137,7 @@ class morph_optimize( morph, object):
                 'method': 'L-BFGS-B',
                 'bounds': [(b0, None) for x in range(len(self.flow.circuit.list_graph_edges))],
                 'args': (self.flow.circuit),
-                'jac': True,
+                'jac': False,
                 'tol': 1e-10
                 }
         }
