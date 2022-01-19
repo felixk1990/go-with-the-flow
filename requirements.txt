@@ -1,0 +1,7 @@
+hailhydro==0.0.7
+kirchhoff==0.2.2
+line_profiler==3.0.2
+networkx==2.5
+numpy==1.19.1
+scipy==1.5.2
+
