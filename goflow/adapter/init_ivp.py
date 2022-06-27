@@ -60,6 +60,7 @@ class morph():
 class morph_dynamic(morph):
 
     def __post_init__(self):
+        self.evals = 100
         self.init_model_and_flow()
         self.link_model_flow()
 
@@ -74,12 +75,33 @@ class morph_dynamic(morph):
             # 'dense_output': True,
         }
 
-        self.evals = 100
-
         for k, v in self.model.solver_options.items():
             self.options[k] = v
         self.options.update({
             't_eval': np.linspace(t_span[0], t_span[1], num=self.evals)
+        })
+
+        ds_func = self.model.calc_update_stimuli
+
+        nsol = si.solve_ivp(ds_func, t_span, x0, **self.options)
+
+        return nsol
+
+    def nlogSolve(self, t_span, x0):
+
+        self.options = {
+            # 'method': 'RK45',
+            'method': 'LSODA',
+            # 'method': 'BDF',
+            'atol': 1e-10,
+            'rtol': 1e-7,
+            # 'dense_output': True,
+        }
+
+        for k, v in self.model.solver_options.items():
+            self.options[k] = v
+        self.options.update({
+            't_eval': np.logspace(np.log10(t_span[0]), np.log10(t_span[1]), num=self.evals)
         })
 
         ds_func = self.model.calc_update_stimuli
@@ -98,7 +120,6 @@ class morph_dynamic(morph):
         for k, v in kwargs.items():
             self.options[k] = v
 
-        self.evals = 100
         self.options.update({
             't_eval': np.linspace(t_span[0], t_span[1], num=self.evals)
         })
