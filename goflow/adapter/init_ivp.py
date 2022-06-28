@@ -5,6 +5,7 @@
 # @Last modified by:    Felix Kramer
 # @Last modified time: 2021-09-08T20: 54: 23+02: 00
 
+import sys
 import numpy as np
 import scipy.optimize as sc
 import scipy.integrate as si
@@ -55,6 +56,9 @@ class morph():
 
             self.flow = self.contrct
             self.model = self.mode
+
+        else:
+            sys.exit('Terminating Program: No valid adaptation model provided.')
 
 @dataclass
 class morph_dynamic(morph):

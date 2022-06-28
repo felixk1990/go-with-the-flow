@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import os.path as op
 
 import kirchhoff.circuit_flow as kfc
@@ -11,53 +12,13 @@ locPath = './goflow/test/tmp'
 from aux import *
 
 
-def initEval():
-
-    #initialize circuit+flow pattern
-    # Circuit = kfc.initialize_flow_circuit_from_crystal('hexagonal',3)
-    # pars_src = dict(mode='default')
-    # pars_plx = dict(mode='default')
-    # flowArgs= [Circuit, pars_src, pars_plx]
-    # F = Flow(*flowArgs)
-    #
-    # # set model and model parameters
-    # pars_model={
-    #     'alpha_0':1.,
-    #     'alpha_1':1.
-    # }
-    # murrayModel = murray(pars_model)
-    #
-    # # # initialize dynamic system and set integration parameters
-    # morpheus = gi.morph_dynamic(flow=F, model=murrayModel)
-    #
-    # cnd = Circuit.edges['conductivity']
-    # cnd_scale = Circuit.scales['conductance']
-    # sp={
-    #     't0': 0.,
-    #     't1': 25.,
-    #     'x0': np.power(cnd/cnd_scale,0.25),
-    # }
-    #
-    # # numerically evaluate the system
-    # update = murrayModel.calc_update_stimuli
-    # nsol = morpheus.nsolve(update, (sp['t0'],sp['t1']), sp['x0'], **murrayModel.solver_options)
+def initEval(mode, pars_src, pars_plx, pars_model):
 
     #initialize circuit+flow pattern
     # C = kfi.initialize_circuit_from_crystal('laves',3)
     C = kfc.initialize_circuit_from_crystal('triagonal_planar',5).G
-    pars_src = {
-        'modesSRC': 'root_geometric'
-    }
-    pars_plx = {
-        'modePLX':'default',
-    }
-    # set model and model parameters
-    pars_model = {
-        'alpha_0':1.,
-        'alpha_1':1.
-    }
     # # initialize dynamic system and set integration parameters
-    morpheus = gi.morph_dynamic(C, 'murray', [pars_model, pars_src, pars_plx])
+    morpheus = gi.morph_dynamic(C, mode, [pars_model, pars_src, pars_plx])
     morpheus.evals = 200
 
     # numerically evaluate the system
@@ -82,24 +43,24 @@ def get_nullity(H):
 
     return nullity, CC
 
-def test_nsol():
+def calc_nsol(*args):
 
-    nsol, morpheus = initEval()
+    nsol, morpheus = initEval(*args)
 
     dataPoints = zip(nsol.t,nsol.y.transpose())
-    murrayModel = morpheus.model
-    args = murrayModel.solver_options['args']
-    cost = [murrayModel.calc_cost_stimuli(t, y, *args)[0] for t, y in dataPoints]
+    model = morpheus.model
+    pars = model.solver_options['args']
+    cost = [model.calc_cost_stimuli(t, y, *pars)[0] for t, y in dataPoints]
 
-    np.save(op.join(locPath, 'weights'), nsol.y.transpose()[-1])
-    np.save(op.join(locPath,'cost'), cost)
+    np.save(op.join(locPath, f'weights_{args[0]}'), nsol.y.transpose()[-1])
+    np.save(op.join(locPath,f'cost_{args[0]}'), cost)
 
     g = morpheus.flow.circuit.G
-    saveGraphJson(g, op.join(locPath,'graph'))
+    saveGraphJson(g, op.join(locPath,f'graph_{args[0]}'))
 
-    assert nsol.success
+    return nsol
 
-def test_graphState():
+def calc_graphState():
 
     conductivity = np.load(op.join(locPath, 'weights.npy'))
     G = loadGraphJson(op.join(locPath, 'graph'))
@@ -122,9 +83,9 @@ def test_graphState():
         cnd3 = True
     print(f'Connectivity test passed: {cnd3}')
 
-    assert (cnd1 and cnd3)
+    return cnd1, cnd3
 
-def test_optimisation():
+def calc_optimisation():
 
     cost = np.load(op.join(locPath, 'cost.npy'))
     cnd_set = []
@@ -142,4 +103,54 @@ def test_optimisation():
         cnd2 = True
     print(f'Optimisation test passed: {cnd2}')
 
-    assert cnd2
+    return cnd2
+
+def test_setUp():
+
+    os.system(f'mkdir {locPath}')
+
+def test_nsol():
+
+    pars_src = dict(modesSRC='root_geometric')
+    pars_plx = dict(modePLX='default')
+    mode = ['murray', 'bohn']
+    for i in range(2):
+
+        # set model and model parameters
+        pars_model = dict(
+            alpha_0=1.,
+            alpha_1=1.
+        )
+
+        args = [mode[i], pars_src, pars_plx, pars_model]
+        nsol = calc_nsol(*args)
+        assert nsol.success
+
+def test_cleanUp():
+
+    os.system(f'rm -r {locPath}')
+# def test_optimisation():
+#
+#     cnd2 = calc_optimisation()
+#     assert cnd2
+#
+# def test_graphState():
+#
+#     cnd1, cnd3 = calc_graphState()
+#     assert (cnd1 and cnd3)
+#
+# def test_models_flow():
+#
+#
+#     pars_src = dict(modesSRC='root_geometric')
+#     pars_plx = dict(modePLX='default')
+#
+#     # set model and model parameters
+#     pars_model = dict(
+#         alpha_0=1.,
+#         alpha_1=1.
+#     )
+#
+#     args = ['murray', pars_src, pars_plx, pars_model]
+#     nsol, morpheus = initEval(*args)
+#     assert(True)
