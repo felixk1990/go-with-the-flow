@@ -96,7 +96,7 @@ fig.show()
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
-
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/HEAD)
 ## Acknowledgement
 * Pre-customized models presentend and implemented here as given by:
     *  Murray, The Physiological Principle of Minimum Work, 1926
