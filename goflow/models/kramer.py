@@ -2,8 +2,8 @@
 # @Date:   23-06-2021
 # @Email:  kramer@mpi-cbg.de
 # @Project: phd_network_remodelling
-# @Last modified by:    Felix Kramer
-# @Last modified time: 2021-09-08T21:08:26+02:00
+# @Last modified by:   felixk1990
+# @Last modified time: 2022-06-29T17:54:15+02:00
 
 import numpy as np
 import copy
@@ -48,12 +48,6 @@ class kramer(model):
         # default = self.events[self.solver_options['events']]
         # self.solver_options['events'] = [ default, self.prune]
         self.solver_options['events'] = self.events[self.solver_options['events']]
-
-    # except:
-    #     print('Warning: Event handling got inadequadt event function, falling back to default')
-    #
-    #     default = self.events[self.solver_options['events']]
-    #     self.solver_options['events'] = [ self.events['default'] , self.prune]
 
     def set_solver_options(self, solv_opt):
 

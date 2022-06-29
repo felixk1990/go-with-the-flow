@@ -1,3 +1,11 @@
+# @Author: Felix Kramer <felixk1990>
+# @Date:   2022-06-28T16:24:41+02:00
+# @Email:  felixuwekramer@proton.me
+# @Filename: aux.py
+# @Last modified by:   felixk1990
+# @Last modified time: 2022-06-28T23:50:29+02:00
+
+
 import networkx.readwrite.json_graph as nj
 import json
 import numpy as np
@@ -58,3 +66,12 @@ def clipp_graph(circuit):
     circuit.H_J = np.asarray(circuit.H_J)
 
     return circuit
+
+def get_nullity(H):
+
+    E = nx.number_of_edges(H)
+    N = nx.number_of_nodes(H)
+    CC = nx.number_connected_components(H)
+    nullity = E-N+CC
+
+    return nullity, CC
