@@ -2,8 +2,8 @@
 # @Date:   23-06-2021
 # @Email:  kramer@mpi-cbg.de
 # @Project: phd_network_remodelling
-# @Last modified by:    Felix Kramer
-# @Last modified time: 2021-09-08T21:08:26+02:00
+# @Last modified by:   felix
+# @Last modified time: 2022-07-01T17:33:02+02:00
 
 import numpy as np
 from dataclasses import dataclass, field
@@ -13,6 +13,24 @@ from .base import model
 
 @dataclass
 class murray(model):
+    """
+    The network adaptation model according to Murray, based on flow
+    dissipation-volume minimization as published in:
+     Murray, The Physiological Principle of Minimum Work, PNAS, 1926
+
+    The dynamics solve the equation system (in accordance to Hu-Cai,PNAS,2013):
+     XXX EQUATION XXX
+
+    Args:
+        pars (dict):\n
+         The specific model parameters alpha_0, alpha_1. \n
+
+        For futher options see base class, i.e. goflow.models.base
+
+    Returns:
+        type: murray
+
+    """
 
     pars: dict = field(default_factory=dict, init=True, repr=True)
 
@@ -29,10 +47,10 @@ class murray(model):
 
         for k, v in model_pars.items():
 
-            if 'alpha_0' == k :
+            if 'alpha_0' == k:
                 self.model_args[0] = v
 
-            if 'alpha_1' == k :
+            if 'alpha_1' == k:
                 self.model_args[1] = v
 
     def set_solver_options(self, solv_opt):
@@ -47,7 +65,7 @@ class murray(model):
 
         x_sq, p_sq = self.get_stimuli_pars(flow, x_0)
 
-        s1 = 2.*alpha_1*np.multiply( p_sq, x_sq)
+        s1 = 2.*alpha_1*np.multiply(p_sq, x_sq)
         s2 = alpha_0*np.ones(len(x_0))
         ds = np.subtract(s1, s2)
         dx = 2*np.multiply(ds, x_0)
@@ -59,7 +77,7 @@ class murray(model):
         x_sq, p_sq = self.get_stimuli_pars(flow, x_0)
 
         f1 = alpha_1*np.multiply(p_sq, np.power(x_sq, 2))
-        f2 = alpha_0 *x_sq
+        f2 = alpha_0 * x_sq
         F = np.sum(np.add(f1, f2))
 
         dF = -self.calc_update_stimuli(t, x_0, flow, alpha_0, alpha_1)
@@ -73,6 +91,6 @@ class murray(model):
 
         x_sq = np.power(x_0, 2)
         conductivity = flow.calc_conductivity_from_cross_section(x_sq, k)
-        p_sq, q_sq =flow.calc_sq_flow(conductivity, src)
+        p_sq, q_sq = flow.calc_sq_flow(conductivity, src)
 
         return x_sq, p_sq
