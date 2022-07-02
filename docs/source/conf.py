@@ -3,7 +3,7 @@
 # @Email:  felixuwekramer@proton.me
 # @Filename: conf.py
 # @Last modified by:   felix
-# @Last modified time: 2022-07-01T14:44:35+02:00
+# @Last modified time: 2022-07-02T12:33:14+02:00
 
 import pathlib
 # Configuration file for the Sphinx documentation builder.
@@ -41,9 +41,9 @@ master_doc = 'index'
 extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
+    # 'sphinx.ext.mathbase',
     # 'sphinx.ext.duration',,
     # 'sphinx.ext.napoleon',
-    # 'myst_parser',
     'recommonmark'
 ]
 # Add any paths that contain templates here, relative to this directory.

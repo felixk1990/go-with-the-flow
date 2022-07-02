@@ -3,7 +3,7 @@
 # @Email:  felixuwekramer@proton.me
 # @Filename: init_ivp.py
 # @Last modified by:   felix
-# @Last modified time: 2022-07-01T16:32:42+02:00
+# @Last modified time: 2022-07-01T18:56:54+02:00
 
 import sys
 import numpy as np
@@ -365,12 +365,11 @@ class morph_dynamic(morph):
             Iterable: Tuple of two arrays (t, x(t))
         """
 
-        t_samples = np.arange(
+        t_samples = kwargs['step']*np.arange(
                         0,
                         kwargs['num_steps'],
                         step=kwargs['sample_rate']
                         )
-        t_samples *= kwargs['step']
 
         sol = np.zeros((kwargs['samples'], len(x0)))
         c_m = 0

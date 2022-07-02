@@ -3,7 +3,7 @@
 # @Email:  felixuwekramer@proton.me
 # @Filename: base.py
 # @Last modified by:   felix
-# @Last modified time: 2022-07-01T17:21:12+02:00
+# @Last modified time: 2022-07-02T14:16:48+02:00
 
 import numpy as np
 from dataclasses import dataclass, field
@@ -20,7 +20,7 @@ class model():
     Based on scipy.integrate.solve_ivp (1.7.3) it defines specific event
     handlers for stiff systems and utility functions.
 
-    Args:
+    Attributes:
         ivp_options (dict):\n
          Information to generate the internal solver_options. Providing t0,t1
          number of evaluation and x0.\n
@@ -35,8 +35,26 @@ class model():
         null_decimals (in):\n
          description \n
 
-    Returns:
-        type: model
+    Methods:
+        init()
+            The model post_init function.
+        update_event_func()
+            Update the event function and ensures that solver_options are set.
+        flatlining_default(t, x_0, *args)
+            The default flatlining function for determining the terminal event
+            of the dynamical system.
+        flatlining_dynamic(t, x_0, *args)
+            The dynamic flatlining function for determining the terminal event
+            of the dynamical system.
+        set_model_parameters(model_pars)
+            Set internal model arguments array.
+        set_solver_options(solv_opt)
+            Set internal solver_options and update event function.
+        calc_update_stimuli(t, x_0, *args)
+            The dynamic system's temporal update rule, computing the gradient
+            -dF for dx/dt.
+        calc_cost_stimuli(t, x_0, *args)
+            Computes the dynamic system's Lyapunov function and its gradient.
 
     """
 
@@ -58,12 +76,6 @@ class model():
         The model post_init function.
 
         Setting proxy values for internal variables.
-
-        Args:
-            None
-
-        Returns:
-            type: None
 
         """
 
@@ -91,12 +103,6 @@ class model():
     def update_event_func(self):
         """
         Update the event function and ensures that solver_options are set.
-
-        Args:
-            None
-
-        Returns:
-            None
 
         Raises:
             Exception: \\n
@@ -202,9 +208,6 @@ class model():
              model_pars (dict):\n
               Model argument dictionary generated on program initilization. \n
 
-        Returns:
-            None
-
         """
 
         for k, v in model_pars.items():
@@ -218,9 +221,6 @@ class model():
         Args:
              solv_opt (dict):\n
               Solver argument dictionary generated on program initilization. \n
-
-        Returns:
-            None
 
         """
 
@@ -241,7 +241,7 @@ class model():
             x_0 (array):\n
              Current state vector of the DS. \n
             args (iterable):\n
-             Model specific tuple of parameters, needed to evaluate stimulus ]
+             Model specific tuple of parameters, needed to evaluate stimulus
              functions \n
 
         Returns:

@@ -28,12 +28,6 @@ goflow.models.meigel
   :members:
   :show-inheritance:
 
-goflow.models.meigel
-------------------------------------------------
-.. automodule:: goflow.models.murray
-   :members:
-   :show-inheritance:
-
 goflow.models.kramer
 ------------------------------------------------
 .. automodule:: goflow.models.kramer
