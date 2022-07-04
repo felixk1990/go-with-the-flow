@@ -37,7 +37,7 @@ flow.circuit.draw_weight_scaling=2.
 fig=flow.circuit.plot_circuit()
 fig.show()
 ```
-![plexus](./gallery/plexus_murray.png)
+![plexus](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/plexus_murray.png)
 
 Next you have to set the dynamical model (how are flows calculated, vessels adjusted during each adaptation step):
 ```
@@ -72,7 +72,7 @@ for i, c in enumerate(nsol.y):
     fig.add_trace(go.Scatter(x=nsol.t, y=c, mode='lines', name=names[i], line={'color': cl}))
 fig.show()
 ```
-![dynamics](./gallery/dynamics_murray.png)<br>
+![dynamics](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/dynamics_murray.png)<br>
 You can customize what the interactive plots display:
 ```
 flow.circuit.edges['conductivity']=nsol.y.transpose()[-1]*3.
@@ -84,8 +84,8 @@ flow.circuit.edges['flow_rate'], dP=flow.calc_configuration_flow()
 fig=flow.circuit.plot_circuit('flow_rate', color_edges=[np.absolute(Q)], linewidth=[flow.circuit.edges['conductivity']])
 fig.show()
 ```
-![updated1](https://github.com/felixk1990/go-with-the-flow/blob/422b28664ef0aa4d470a05faccfa7f0854f42ae2/gallery/updated_murray1.png)
-![updated2](https://github.com/felixk1990/go-with-the-flow/blob/422b28664ef0aa4d470a05faccfa7f0854f42ae2/gallery/updated_murray2.png
+![updated1](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray1.png)<br>
+![updated2](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray2.png)<br>
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
