@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>goflow.adapter.init_ivp &#8212; go-with-the-flow  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">go-with-the-flow  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">goflow.adapter.init_ivp</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for goflow.adapter.init_ivp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># @Author: Felix Kramer &lt;felix&gt;</span>
+<span class="c1"># @Date:   2022-06-29T18:27:48+02:00</span>
+<span class="c1"># @Email:  felixuwekramer@proton.me</span>
+<span class="c1"># @Filename: init_ivp.py</span>
+<span class="c1"># @Last modified by:   felix</span>
+<span class="c1"># @Last modified time: 2022-07-01T18:56:54+02:00</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="c1"># import scipy.optimize as sc</span>
+<span class="kn">import</span> <span class="nn">scipy.integrate</span> <span class="k">as</span> <span class="nn">si</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="kn">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">binder</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="c1"># general initial value problem for network morpgogenesis</span>
+
+
+<div class="viewcode-block" id="proxy_solver"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.proxy_solver">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">proxy_solver</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A proxy solver class for custom numeric integration.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tsamples (array):\n</span>
+<span class="sd">         Setting the internal sample time points.</span>
+<span class="sd">        \n</span>
+<span class="sd">        sol (array):\n</span>
+<span class="sd">         Time series of data to be stored internally.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        type: proxy_solver</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">defVal</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">t_samples</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="o">**</span><span class="n">defVal</span><span class="p">)</span>
+    <span class="n">sol</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="o">**</span><span class="n">defVal</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="morph"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">morph</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Basic Class for simulating flow network adaption dynamics.</span>
+
+<span class="sd">    &#39;Morph&#39; computes the long-term network development on the basis of</span>
+<span class="sd">    flow and gradient descent. The class acts as a wrapper to ensure correct</span>
+<span class="sd">    pre-/post-proccessing of the network&#39;s data and output. Utilizing the</span>
+<span class="sd">    modules &#39;kirchhoff&#39; and &#39;hailhydro&#39; as well as goflow.models.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        construct (nx.Graph):\n</span>
+<span class="sd">         A network plexus, recommended to be &#39;kirchhoff&#39; circuit or an</span>
+<span class="sd">         initialized &#39;hailhydro&#39; flow/flux. Handling for deviations only</span>
+<span class="sd">         provided for standard models.\n</span>
+<span class="sd">        mode (string/model):\n</span>
+<span class="sd">         A descriptive string for selection internal model object.\n</span>
+<span class="sd">        args (tuple):\n</span>
+<span class="sd">         A parameter tuple for evaluation of the model given a plexus.\n</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        type: morph</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">defVal</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">construct</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="o">**</span><span class="n">defVal</span><span class="p">)</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">defVal</span><span class="p">)</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span> <span class="o">**</span><span class="n">defVal</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Post object initialization methods.</span>
+
+<span class="sd">        Streamline provided model and flow parameters and set dynamics of the</span>
+<span class="sd">        ODE system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_model_and_flow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">link_model_flow</span><span class="p">()</span>
+
+<div class="viewcode-block" id="morph.link_model_flow"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph.link_model_flow">[docs]</a>    <span class="k">def</span> <span class="nf">link_model_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transfer model and flow parameters to internal variables of solver.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">model_args</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">solver_options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">update_event_func</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="morph.init_model_and_flow"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph.init_model_and_flow">[docs]</a>    <span class="k">def</span> <span class="nf">init_model_and_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set internal model and flow variables with constructor values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: \n</span>
+<span class="sd">             sys.exit(&#39;Terminate Program: No valid adaptation model provided.&#39;)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="n">model</span><span class="p">):</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">construct</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="n">binder</span><span class="o">.</span><span class="n">modelBinder</span><span class="p">:</span>
+
+            <span class="n">model</span> <span class="o">=</span> <span class="n">binder</span><span class="o">.</span><span class="n">modelBinder</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">]</span>
+            <span class="n">flow</span> <span class="o">=</span> <span class="n">binder</span><span class="o">.</span><span class="n">circuitBinder</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flow</span> <span class="o">=</span> <span class="n">flow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">construct</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Terminate Program: No valid adaptation model provided.&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="morph_dynamic"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">morph_dynamic</span><span class="p">(</span><span class="n">morph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derived class definition from morph, for specific dynamic models.</span>
+
+<span class="sd">    Defines explicit ODE solvers and customizable forward integration solvers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        construct (nx.Graph):\n</span>
+<span class="sd">         A network plexus, recommended to be &#39;kirchhoff&#39; circuit or an</span>
+<span class="sd">         initialized &#39;hailhydro&#39; flow/flux. Handling for deviations only</span>
+<span class="sd">         provided for standard models.\n</span>
+<span class="sd">        mode (string/model):\n</span>
+<span class="sd">         A descriptive string for selection internal model object.\n</span>
+<span class="sd">        args (tuple):\n</span>
+<span class="sd">         A parameter tuple for evaluation of the model given a plexus.\n</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        type: morph_dynamic</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Post object initialization methods.</span>
+
+<span class="sd">        Streamline provided model and flow parameters and set dynamics of the</span>
+<span class="sd">        ODE system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evals</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_model_and_flow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">link_model_flow</span><span class="p">()</span>
+
+<div class="viewcode-block" id="morph_dynamic.autoSolve"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic.autoSolve">[docs]</a>    <span class="k">def</span> <span class="nf">autoSolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_span</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Default ODE solver/wrapper for given adaptation models.</span>
+
+<span class="sd">        Based on methods of scipy.integrate, hence solver options are</span>
+<span class="sd">        customizable via the internal model.solver_options attribute and align</span>
+<span class="sd">        with scipy standards.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t_span (tuple):\n</span>
+<span class="sd">             A tuple setting the linear range of values for</span>
+<span class="sd">             explicit evaluation.\n</span>
+<span class="sd">            x0 (array):\n</span>
+<span class="sd">             An array of initial values to start the numeric integration of the</span>
+<span class="sd">             dynamic system.\n</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable: Same set of return values as scipy.integrate.solve_ivp</span>
+<span class="sd">            (1.7.3)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1"># &#39;method&#39;: &#39;RK45&#39;,</span>
+            <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>
+            <span class="c1"># &#39;method&#39;: &#39;BDF&#39;,</span>
+            <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="mf">1e-10</span><span class="p">,</span>
+            <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
+            <span class="c1"># &#39;dense_output&#39;: True,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">solver_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">t_span</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_span</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">evals</span><span class="p">)</span>
+        <span class="p">})</span>
+
+        <span class="n">ds_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">calc_update_stimuli</span>
+
+        <span class="n">nsol</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">solve_ivp</span><span class="p">(</span><span class="n">ds_func</span><span class="p">,</span> <span class="n">t_span</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsol</span></div>
+
+<div class="viewcode-block" id="morph_dynamic.nlogSolve"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic.nlogSolve">[docs]</a>    <span class="k">def</span> <span class="nf">nlogSolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_span</span><span class="p">,</span> <span class="n">x0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom ODE solver/wrapper for given adaptation models with logarithmic</span>
+<span class="sd">        evaluation timescales.</span>
+
+<span class="sd">        Based on methods of scipy.integrate, hence solver options are</span>
+<span class="sd">        customizable via the internal model.solver_options attribute and align</span>
+<span class="sd">        with scipy standards.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t_span (tuple):\n</span>
+<span class="sd">             A tuple setting the logarithmic range of values for</span>
+<span class="sd">             explicit evaluation.\n</span>
+<span class="sd">            x0 (array):\n</span>
+<span class="sd">             An array of initial values to start the numeric</span>
+<span class="sd">             integration of the dynamic system.\n</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable: Same set of return values as scipy.integrate.solve_ivp</span>
+<span class="sd">            (1.7.3)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="c1"># &#39;method&#39;: &#39;RK45&#39;,</span>
+            <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>
+            <span class="c1"># &#39;method&#39;: &#39;BDF&#39;,</span>
+            <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="mf">1e-10</span><span class="p">,</span>
+            <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="mf">1e-7</span><span class="p">,</span>
+            <span class="c1"># &#39;dense_output&#39;: True,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">solver_options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">t_span</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">t_span</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">evals</span>
+                        <span class="p">)</span>
+        <span class="p">})</span>
+
+        <span class="n">ds_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">calc_update_stimuli</span>
+
+        <span class="n">nsol</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">solve_ivp</span><span class="p">(</span><span class="n">ds_func</span><span class="p">,</span> <span class="n">t_span</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsol</span></div>
+
+<div class="viewcode-block" id="morph_dynamic.nsolve"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic.nsolve">[docs]</a>    <span class="k">def</span> <span class="nf">nsolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_func</span><span class="p">,</span> <span class="n">t_span</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom ODE solver/wrapper for given adaptation models with linear</span>
+<span class="sd">        evaluation timescales and custom update function. Based on methods of</span>
+<span class="sd">        scipy.integrate.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ds_func (callable function):\n</span>
+<span class="sd">             The update function of the dynamic system, which is supposed to</span>
+<span class="sd">             define dx/dt, according to scipy standards.\n</span>
+<span class="sd">            t_span (tuple):\n</span>
+<span class="sd">             A tuple setting the logarithmic range of values for</span>
+<span class="sd">             explicit evaluation.\n</span>
+<span class="sd">            x0 (array):\n</span>
+<span class="sd">             An array of initial values to start the numeric</span>
+<span class="sd">             integration of the dynamic system.\n</span>
+<span class="sd">            kwargs (dict):\n</span>
+<span class="sd">             Dictionary for setting solver options according to</span>
+<span class="sd">             scipy.integrate.solve_ivp standards.\n</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable: Same set of return values as scipy.integrate.solve_ivp</span>
+<span class="sd">            (1.7.3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="mf">1e-10</span><span class="p">,</span>
+            <span class="s1">&#39;dense_output&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">t_span</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_span</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">evals</span><span class="p">)</span>
+        <span class="p">})</span>
+
+        <span class="n">nsol</span> <span class="o">=</span> <span class="n">si</span><span class="o">.</span><span class="n">solve_ivp</span><span class="p">(</span><span class="n">ds_func</span><span class="p">,</span> <span class="n">t_span</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsol</span></div>
+
+<div class="viewcode-block" id="morph_dynamic.nsolve_custom"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic.nsolve_custom">[docs]</a>    <span class="k">def</span> <span class="nf">nsolve_custom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom ODE solver onthe basis of Foward-Euler, for given adaptation</span>
+<span class="sd">        models with custom evaluation timescales and step width and custom</span>
+<span class="sd">        update function. Acts as a wrapper for nsolve_fw_euler.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ds_func (callable function):\n</span>
+<span class="sd">             The update function of the dynamic system, which is supposed to</span>
+<span class="sd">            define dx/dt, according to scipy standards.\n</span>
+<span class="sd">            t_span (tuple):\n</span>
+<span class="sd">             A tuple setting the logarithmic range of values for explicit</span>
+<span class="sd">             evaluation.\n</span>
+<span class="sd">            x0 (array):\n</span>
+<span class="sd">             An array of initial values to start the numeric</span>
+<span class="sd">             integration of the dynamic system.\n</span>
+<span class="sd">            kwargs (dict):\n</span>
+<span class="sd">             A dictionary setting custom solver options such as</span>
+<span class="sd">             number of evaluations &#39;sample&#39;, number of steps &#39;num_steps&#39;\n</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable: Tuple of two arrays (t, x(t))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;num_steps&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;samples&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="n">ns</span><span class="p">,</span> <span class="n">sr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_integration_scale</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;num_steps&#39;</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">]</span>
+                        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;sample_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;num_steps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ns</span>
+
+        <span class="n">nsol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsolve_fw_euler</span><span class="p">(</span><span class="n">ds_func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsol</span></div>
+
+<div class="viewcode-block" id="morph_dynamic.nsolve_fw_euler"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic.nsolve_fw_euler">[docs]</a>    <span class="k">def</span> <span class="nf">nsolve_fw_euler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_func</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom ODE solver onthe basis of Foward-Euler, for given adaptation</span>
+<span class="sd">        models with custom evaluation timescales and step width and custom</span>
+<span class="sd">        update function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ds_func (callable):\n</span>
+<span class="sd">             The update function of the dynamic system, which is supposed to</span>
+<span class="sd">             define dx/dt, according to scipy standards.\n</span>
+<span class="sd">            t_span (tuple):\n</span>
+<span class="sd">             A tuple setting the logarithmic range of values for</span>
+<span class="sd">             explicit evaluation.\n</span>
+<span class="sd">            x0 (array):\n</span>
+<span class="sd">             An array of initial values to start the numeric integration of the</span>
+<span class="sd">             dynamic system.\n</span>
+<span class="sd">            kwargs (dict):\n</span>
+<span class="sd">             A dictionary setting custom solver options.\n</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable: Tuple of two arrays (t, x(t))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">t_samples</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;num_steps&#39;</span><span class="p">],</span>
+                        <span class="n">step</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;sample_rate&#39;</span><span class="p">]</span>
+                        <span class="p">)</span>
+
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">)))</span>
+        <span class="n">c_m</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">x_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;num_steps&#39;</span><span class="p">]):</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;sample_rate&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sol</span><span class="p">[</span><span class="n">c_m</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_0</span><span class="p">[:]</span>
+                <span class="n">c_m</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">ds_func</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span> <span class="n">x_0</span><span class="p">,</span> <span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">])</span>
+            <span class="n">x_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x_0</span><span class="p">,</span> <span class="n">dx</span><span class="o">*</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">])</span>
+
+        <span class="n">nsol</span> <span class="o">=</span> <span class="n">proxy_solver</span><span class="p">(</span><span class="n">t_samples</span><span class="p">,</span> <span class="n">sol</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">nsol</span></div>
+
+<div class="viewcode-block" id="morph_dynamic.set_integration_scale"><a class="viewcode-back" href="../../../adapter.html#goflow.adapter.init_ivp.morph_dynamic.set_integration_scale">[docs]</a>    <span class="k">def</span> <span class="nf">set_integration_scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Num_steps</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the sample rate for the given dynamic system.</span>
+
+<span class="sd">        Given the pre-set number of computing steps and number of evaluations,</span>
+<span class="sd">        Adjusts/increases the number of integration cycles such that last</span>
+<span class="sd">        evaluation coincicdes with last cycle.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Num_steps (int):\n</span>
+<span class="sd">             Number of integration steps to perform for a Forward-Euler scheme.</span>
+<span class="sd">             \n</span>
+<span class="sd">            sample(int):\n</span>
+<span class="sd">             Number of desired function evaluations for output.\n</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable: Num_steps, sample_rate</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># reshape number of integration steps &amp; sample rates for consistency</span>
+        <span class="n">sample_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Num_steps</span><span class="o">/</span><span class="n">sample</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sample_rate</span><span class="o">*</span><span class="n">sample</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Num_steps</span><span class="p">:</span>
+            <span class="n">Num_steps</span> <span class="o">=</span> <span class="n">sample_rate</span><span class="o">*</span><span class="n">sample</span>
+
+        <span class="k">return</span> <span class="n">Num_steps</span><span class="p">,</span> <span class="n">sample_rate</span></div></div>
+<span class="c1"># TODO: GlobalOptimizers</span>
+<span class="c1"># @dataclass</span>
+<span class="c1"># class MySteps():</span>
+<span class="c1">#</span>
+<span class="c1">#     stepsize: float = 0.</span>
+<span class="c1">#     # def __init__(self, stepsize ):</span>
+<span class="c1">#     #     self.stepsize  = stepsize</span>
+<span class="c1">#     def __call__(self, x):</span>
+<span class="c1">#         rx = np.add(x, np.random.rand(len(x))*self.stepsize)</span>
+<span class="c1">#         return rx</span>
+
+<span class="c1"># @dataclass</span>
+<span class="c1"># class morph_optimize(morph):</span>
+<span class="c1">#</span>
+<span class="c1">#     def __post_init__(self):</span>
+<span class="c1">#         E = self.flow.circuit.list_graph_edges</span>
+<span class="c1">#         mysteps = MySteps(1.)</span>
+<span class="c1">#         b0 = 1e-25</span>
+<span class="c1">#         self.options = {</span>
+<span class="c1">#             &#39;step&#39;: mysteps,</span>
+<span class="c1">#             &#39;niter&#39;: 100,</span>
+<span class="c1">#             &#39;T&#39;: 10.,</span>
+<span class="c1">#             &#39;minimizer_kwargs&#39;: {</span>
+<span class="c1">#                 &#39;method&#39;: &#39;L-BFGS-B&#39;,</span>
+<span class="c1">#                 &#39;bounds&#39;: [(b0, None) for x in range(len(E))],</span>
+<span class="c1">#                 &#39;args&#39;: (self.flow.circuit),</span>
+<span class="c1">#                 &#39;jac&#39;: False,</span>
+<span class="c1">#                 &#39;tol&#39;: 1e-10</span>
+<span class="c1">#                 }</span>
+<span class="c1">#         }</span>
+<span class="c1">#</span>
+<span class="c1">#     def update_minimizer_options(**kwargs):</span>
+<span class="c1">#</span>
+<span class="c1">#         if &#39;step&#39; in kwargs:</span>
+<span class="c1">#             mysteps = MySteps(kwargs[&#39;step&#39;])</span>
+<span class="c1">#             kwargs[&#39;step&#39;] = mysteps</span>
+<span class="c1">#</span>
+<span class="c1">#         for k, v in kwargs.items():</span>
+<span class="c1">#             if k in self.options:</span>
+<span class="c1">#                 options[k] = v</span>
+<span class="c1">#</span>
+<span class="c1">#         if &#39;minimizer_kwargs&#39; in kwargs:</span>
+<span class="c1">#             for ks, vs in kwargs[&#39;minimizer_kwargs&#39;]:</span>
+<span class="c1">#                 minimizer_kwargs[ks] = vs</span>
+<span class="c1">#</span>
+<span class="c1">#     def optimize_network(self, cost_func, x0, **kwargs):</span>
+<span class="c1">#</span>
+<span class="c1">#         update_minimizer_options(**kwargs)</span>
+<span class="c1">#</span>
+<span class="c1">#         sol = sc.basinhopping(cost_func, x0, **self.options)</span>
+<span class="c1">#</span>
+<span class="c1">#         return sol</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">go-with-the-flow  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">goflow.adapter.init_ivp</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Felix Kramer.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

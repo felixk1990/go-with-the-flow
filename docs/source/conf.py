@@ -43,6 +43,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.githubpages',
+    'sphinx.ext.viewcode',
     # 'sphinx.ext.mathbase',
     # 'sphinx.ext.duration',,
     # 'sphinx.ext.napoleon',
