@@ -17,15 +17,16 @@ import pathlib
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-locPath = '/home/felix/Documents/Git'
+# locPath = '/home/felix/Documents/Git'
+locPath = '/home/kramer/Documents/GitHub'
 import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(locPath,'go-with-the-flow')))
 sys.path.insert(0, os.path.abspath(os.path.join(locPath,'kirchhoff-circuits')))
 sys.path.insert(0, os.path.abspath(os.path.join(locPath,'kirchhoff-hydro')))
-sys.path.insert(0, os.path.abspath('/home/felix/anaconda3/lib/python3.9/site-packages/'))
-
+sys.path.insert(0, os.path.abspath('/home/kramer/anaconda3/lib/python3.7/site-packages/'))
+# sys.path.insert(0, os.path.abspath('/home/felix/anaconda3/lib/python3.9/site-packages/'))
 # -- Project information -----------------------------------------------------
 
 project = 'go-with-the-flow'
