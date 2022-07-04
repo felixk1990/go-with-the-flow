@@ -42,6 +42,7 @@ master_doc = 'index'
 extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
+    'sphinx.ext.githubpages',
     # 'sphinx.ext.mathbase',
     # 'sphinx.ext.duration',,
     # 'sphinx.ext.napoleon',
