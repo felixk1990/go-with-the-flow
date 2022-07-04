@@ -1,4 +1,4 @@
-About goflow: This repository is all about simulating flow driven pruning in biological flow networks. 
+About goflow: This repository is all about simulating flow driven pruning in biological flow networks.
 ##  Introduction
 This module 'goflow' is the final of a series of pyton packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and dependends on the packages 'kirchhoff','hailhydro'.
 
@@ -60,7 +60,7 @@ sp={
 nsol=morpheus.nsolve(murray.calc_update_stimuli,(sp['t0'],sp['t1']),sp['x0'], **murray.solver_options)
 cost=[murray.calc_cost_stimuli(t,y,*murray.solver_options['args']) for t,y in zip(nsol.t,nsol.y.transpose())]
 ```
-When you are done, plot dynamics of vessel development and the final structures. 
+When you are done, plot dynamics of vessel development and the final structures.
 ```
 #plot dynamic data such as radii and costs
 import plotly.graph_objects as go
@@ -84,8 +84,8 @@ flow.circuit.edges['flow_rate'], dP=flow.calc_configuration_flow()
 fig=flow.circuit.plot_circuit('flow_rate', color_edges=[np.absolute(Q)], linewidth=[flow.circuit.edges['conductivity']])
 fig.show()
 ```
-![updated1](./gallery/updated_murray1.png)
-![updated2](./gallery/updated_murray2.png)
+![updated1](https://github.com/felixk1990/go-with-the-flow/blob/422b28664ef0aa4d470a05faccfa7f0854f42ae2/gallery/updated_murray1.png)
+![updated2](https://github.com/felixk1990/go-with-the-flow/blob/422b28664ef0aa4d470a05faccfa7f0854f42ae2/gallery/updated_murray2.png
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
