@@ -1,0 +1,1345 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>goflow.models.base &#8212; go-with-the-flow  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="goflow.adapter.init_ivp" href="adapter.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="adapter.html" title="goflow.adapter.init_ivp"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">go-with-the-flow  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="goflow.html" accesskey="U">goflow modules</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">goflow.models.base</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-goflow.models.base">
+<span id="goflow-models-base"></span><h1>goflow.models.base<a class="headerlink" href="#module-goflow.models.base" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.base.model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.base.</span></span><span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#goflow.models.base.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The basic model class, acting as a center piece for ‘morph’ simulations, as
+it defines the individual dynamic system.</p>
+<p>This class defines the ODE sytem, metabolic cost model and a diverse set of
+functionalities for effective evaluation of any simulation’s proceeding.
+Based on scipy.integrate.solve_ivp (1.7.3) it defines specific event
+handlers for stiff systems and utility functions.</p>
+<dl>
+<dt>Attributes:</dt><dd><p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id1"><span class="problematic" id="id2">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id3"><span class="problematic" id="id4">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id5"><span class="problematic" id="id6">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id7"><span class="problematic" id="id8">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.calc_cost_stimuli">
+<span class="sig-name descname"><span class="pre">calc_cost_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.calc_cost_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The computed gradient dF to the current cost function F, as well
+as F itself.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.f">
+<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic flatlining function for determining the terminal event of
+the dynamical system.</p>
+<p>Based on the event handling schemes of scipy.integrate.solve_ivp
+(1.7.3), has the same call signature as calc_update_stimuli(). The
+method checks whether the magnitude of relative change of the
+state vector x_0 has decreased beneath a certain threshold.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, same signature as needed for
+calc_update_stimuli.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>float:</p>
+<blockquote>
+<div><p>z, the signature of sign change, signaling the internal
+threshold being passed.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.flatlining_default">
+<span class="sig-name descname"><span class="pre">flatlining_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.flatlining_default" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default flatlining function for determining the terminal event of
+the dynamical system.</p>
+<p>Based on the event handling schemes of scipy.integrate.solve_ivp
+(1.7.3), has the same call signature as calc_update_stimuli(). The
+method checks whether the system’s Lyapunov function
+has decreased beneath a certain threshold.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, same signature as needed for
+calc_update_stimuli.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>float:</p>
+<blockquote>
+<div><p>z, the signature of sign change, signaling the internal
+threshold being passed.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.flatlining_dynamic">
+<span class="sig-name descname"><span class="pre">flatlining_dynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.flatlining_dynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic flatlining function for determining the terminal event of
+the dynamical system.</p>
+<p>Based on the event handling schemes of scipy.integrate.solve_ivp
+(1.7.3), has the same call signature as calc_update_stimuli(). The
+method checks whether the magnitude of relative change of the
+state vector x_0 has decreased beneath a certain threshold.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, same signature as needed for
+calc_update_stimuli.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>float:</p>
+<blockquote>
+<div><p>z, the signature of sign change, signaling the internal
+threshold being passed.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.init">
+<span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>The model post_init function.</p>
+<p>Setting proxy values for internal variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.set_model_parameters">
+<span class="sig-name descname"><span class="pre">set_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.set_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal model arguments array.</p>
+<dl>
+<dt>Args:</dt><dd><p>model_pars (dict):</p>
+<blockquote>
+<div><p>Model argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.set_solver_options">
+<span class="sig-name descname"><span class="pre">set_solver_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solv_opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.set_solver_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal solver_options and update event function.</p>
+<dl>
+<dt>Args:</dt><dd><p>solv_opt (dict):</p>
+<blockquote>
+<div><p>Solver argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.base.model.update_event_func">
+<span class="sig-name descname"><span class="pre">update_event_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.base.model.update_event_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the event function and ensures that solver_options are set.</p>
+<dl class="simple">
+<dt>Raises:</dt><dd><dl class="simple">
+<dt>Exception: n</dt><dd><p>Warning: Event handling got inadequadt event function,
+falling back to default</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-goflow.models.murray">
+<span id="goflow-models-murray"></span><h1>goflow.models.murray<a class="headerlink" href="#module-goflow.models.murray" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.murray.murray">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.murray.</span></span><span class="sig-name descname"><span class="pre">murray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.murray.murray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.models.base.model" title="goflow.models.base.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.models.base.model</span></code></a></p>
+<p>The network adaptation model according to Murray, based on flow
+dissipation-volume minimization as published in:</p>
+<blockquote>
+<div><p>Murray, The Physiological Principle of Minimum Work, PNAS, 1926</p>
+</div></blockquote>
+<p>The system’s cost function is given as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \sum_{e}\left(\frac{f_e^2}{C_e} + ar_e^2\right)\]</div>
+<p>For minimizing this cost one iteratively computes the flow f_e,
+pressure Delta p_e landscapes. The system’s derived gradient descent
+dynamics are given as:</p>
+<div class="math notranslate nohighlight">
+\[\frac{dr_e}{dt} \propto \left[\alpha_1\left(
+\frac{\Delta p_er_e}{L_e}\right)^2-\alpha_0\right] r_e\]</div>
+<dl>
+<dt>Attributes:</dt><dd><p>pars (dict):</p>
+<blockquote>
+<div><p>The specific model parameters alpha_0, alpha_1.</p>
+</div></blockquote>
+<p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id9"><span class="problematic" id="id10">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id11"><span class="problematic" id="id12">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id13"><span class="problematic" id="id14">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id15"><span class="problematic" id="id16">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+<dt>get_stimuli_pars(self, flow, x_0)</dt><dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well
+as squared quantities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.murray.murray.calc_cost_stimuli">
+<span class="sig-name descname"><span class="pre">calc_cost_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.murray.murray.calc_cost_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The computed gradient dF to the current cost function F, as well
+as F itself.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.murray.murray.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.murray.murray.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.murray.murray.get_stimuli_pars">
+<span class="sig-name descname"><span class="pre">get_stimuli_pars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.murray.murray.get_stimuli_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well as
+squared quantities.</p>
+<p>Invokes the internal flow circuit and recalcs flows and pressures as
+well as conductivities according to Hagen-Poiseuille’s law of flows in
+cylindrical pipes.</p>
+<dl>
+<dt>Args:</dt><dd><p>flow (flow):</p>
+<blockquote>
+<div><p>A hailhydro flow object, describing the current flow landscape
+in the transport network.</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the dynmic system.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The squared state vector as well as the squared pressure
+landscape x_sq, p_sq</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.murray.murray.set_model_parameters">
+<span class="sig-name descname"><span class="pre">set_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.murray.murray.set_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal model arguments array.</p>
+<dl>
+<dt>Args:</dt><dd><p>model_pars (dict):</p>
+<blockquote>
+<div><p>Model argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.murray.murray.set_solver_options">
+<span class="sig-name descname"><span class="pre">set_solver_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solv_opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.murray.murray.set_solver_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal solver_options and update event function.</p>
+<dl>
+<dt>Args:</dt><dd><p>solv_opt (dict):</p>
+<blockquote>
+<div><p>Solver argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-goflow.models.bohn">
+<span id="goflow-models-bohn"></span><h1>goflow.models.bohn<a class="headerlink" href="#module-goflow.models.bohn" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.bohn.bohn">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.bohn.</span></span><span class="sig-name descname"><span class="pre">bohn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.bohn.bohn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.models.murray.murray" title="goflow.models.murray.murray"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.models.murray.murray</span></code></a></p>
+<p>The network adaptation model according to Bohn et al, based on flow
+dissipation-volume minimization with reweightedscales of conductivity costs
+as published for example:</p>
+<blockquote>
+<div><p>Katifori et al, Damage and Fluctuations Induce Loops in Optimal
+Transport Networks, PRL,2010</p>
+</div></blockquote>
+<p>The system’s cost function is given as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \sum_{e}\left(\frac{f_e^2}{C_e} + aC_e^{\gamma}\right)\]</div>
+<p>For minimizing this cost one iteratively computes the flow f_e,
+pressure Delta p_e landscapes. The system’s derived gradient descent
+dynamics are given as:</p>
+<div class="math notranslate nohighlight">
+\[\frac{dr_e}{dt} \propto \left[\alpha_1\left(
+\frac{\Delta p_e}{L_e}\right)^2\frac{C_e}{r_e^{4\gamma}}-\alpha_0
+\right] r_e\]</div>
+<dl>
+<dt>Attributes:</dt><dd><p>pars (dict):</p>
+<blockquote>
+<div><p>The specific model parameters alpha_0, alpha_1 and rescaling
+factor gamma.</p>
+</div></blockquote>
+<p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id17"><span class="problematic" id="id18">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id19"><span class="problematic" id="id20">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id21"><span class="problematic" id="id22">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id23"><span class="problematic" id="id24">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+<dt>get_stimuli_pars(self, flow, x_0)</dt><dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well
+as squared quantities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.bohn.bohn.calc_cost_stimuli">
+<span class="sig-name descname"><span class="pre">calc_cost_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.bohn.bohn.calc_cost_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The computed gradient dF to the current cost function F, as well
+as F itself.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.bohn.bohn.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.bohn.bohn.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.bohn.bohn.get_stimuli_pars">
+<span class="sig-name descname"><span class="pre">get_stimuli_pars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.bohn.bohn.get_stimuli_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well as
+squared quantities.</p>
+<p>Invokes the internal flow circuit and recalcs flows and pressures as
+well as conductivities according to Hagen-Poiseuille’s law of flows in
+cylindrical pipes.</p>
+<dl>
+<dt>Args:</dt><dd><p>flow (flow):</p>
+<blockquote>
+<div><p>A hailhydro flow object, describing the current flow landscape
+in the transport network.</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the dynmic system.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The squared state vector as well as the squared pressure
+landscape x_sq, p_sq</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.bohn.bohn.set_model_parameters">
+<span class="sig-name descname"><span class="pre">set_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.bohn.bohn.set_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal model arguments array.</p>
+<dl>
+<dt>Args:</dt><dd><p>model_pars (dict):</p>
+<blockquote>
+<div><p>Model argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-goflow.models.corson">
+<span id="goflow-models-corson"></span><h1>goflow.models.corson<a class="headerlink" href="#module-goflow.models.corson" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.corson.corson">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.corson.</span></span><span class="sig-name descname"><span class="pre">corson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.corson.corson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.models.murray.murray" title="goflow.models.murray.murray"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.models.murray.murray</span></code></a></p>
+<p>The network adaptation model according to Bohn et al, based on flow
+dissipation-volume minimization with reweightedscales of conductivity costs
+as published for example:</p>
+<blockquote>
+<div><p>Corson, Fluctuations and Redundancy in Optimal Transport Networks, PRL,
+2010</p>
+<p>Hu and Cai, Adaptation and Optimization of Biological Transport
+Networks, PRL, 2013</p>
+</div></blockquote>
+<p>The approach assumes a varying sink-source landscape and a time scale
+separation between this variation and radial adaptation.
+The system’s cost function is given as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \sum_{e}\left(C_e\langle \Delta p_e^2\rangle
++ aC_e^{\gamma}\right)\]</div>
+<p>The system’s derived gradient descent
+dynamics are given as:</p>
+<div class="math notranslate nohighlight">
+\[\frac{dr_e}{dt} \propto \left[\alpha_1
+\frac{\langle \Delta p_e^2 \rangle }{L_e^2}
+\frac{C_e}{r_e^{4\gamma}}-\alpha_0\right] r_e\]</div>
+<dl>
+<dt>Attributes:</dt><dd><p>pars (dict):</p>
+<blockquote>
+<div><p>The specific model parameters alpha_0, alpha_1, gamma and
+effective noise strength eta.</p>
+</div></blockquote>
+<p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id25"><span class="problematic" id="id26">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id27"><span class="problematic" id="id28">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id29"><span class="problematic" id="id30">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id31"><span class="problematic" id="id32">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+<dt>get_stimuli_pars(self, flow, x_0)</dt><dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well
+as squared quantities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.corson.corson.calc_cost_stimuli">
+<span class="sig-name descname"><span class="pre">calc_cost_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.corson.corson.calc_cost_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The computed gradient dF to the current cost function F, as well
+as F itself.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.corson.corson.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.corson.corson.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.corson.corson.get_stimuli_pars">
+<span class="sig-name descname"><span class="pre">get_stimuli_pars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.corson.corson.get_stimuli_pars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well as
+squared quantities.</p>
+<p>Invokes the internal flow circuit and recalcs flows and pressures as
+well as conductivities according to Hagen-Poiseuille’s law of flows in
+cylindrical pipes.</p>
+<dl>
+<dt>Args:</dt><dd><p>flow (flow):</p>
+<blockquote>
+<div><p>A hailhydro flow object, describing the current flow landscape
+in the transport network.</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the dynmic system.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The squared state vector as well as the squared pressure
+landscape x_sq, p_sq</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.corson.corson.set_model_parameters">
+<span class="sig-name descname"><span class="pre">set_model_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_pars</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.corson.corson.set_model_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal model arguments array.</p>
+<dl>
+<dt>Args:</dt><dd><p>model_pars (dict):</p>
+<blockquote>
+<div><p>Model argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-goflow.models.meigel">
+<span id="goflow-models-meigel"></span><h1>goflow.models.meigel<a class="headerlink" href="#module-goflow.models.meigel" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.meigel.link">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.meigel.</span></span><span class="sig-name descname"><span class="pre">link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.meigel.link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.models.meigel.meigel" title="goflow.models.meigel.meigel"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.models.meigel.meigel</span></code></a></p>
+<p>The network adaptation model according to Meigel/Horton et al, based on
+flow dissipation-volume minimization in combination with supply-demand
+competition of conductivity costs as published for example:</p>
+<blockquote>
+<div><p>Kramer&amp;Modes, On biological flow networks: Antagonism between
+hydrodynamic and metabolic stimuli as driver of topological
+transitions, arXiv:2111.04326</p>
+</div></blockquote>
+<p>The system’s cost function is given as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \sum_{e}\left( \alpha_1 r_e^4\Delta p_e^2 +
+\alpha_0 r_e^2 + \left[ \Phi_e-\Phi_0 \right]^2 \right)\]</div>
+<dl>
+<dt>Attributes:</dt><dd><p>pars (dict):</p>
+<blockquote>
+<div><p>The specific model parameters alpha_0, alpha_1 and demand Phi_0</p>
+</div></blockquote>
+<p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id33"><span class="problematic" id="id34">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id35"><span class="problematic" id="id36">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id37"><span class="problematic" id="id38">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id39"><span class="problematic" id="id40">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+<dt>get_stimuli_pars(self, flow, x_0)</dt><dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well
+as squared quantities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.meigel.link.calc_cost_stimuli">
+<span class="sig-name descname"><span class="pre">calc_cost_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.meigel.link.calc_cost_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The computed gradient dF to the current cost function F, as well
+as F itself.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.meigel.link.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.meigel.link.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.meigel.meigel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.meigel.</span></span><span class="sig-name descname"><span class="pre">meigel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.meigel.meigel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.models.base.model" title="goflow.models.base.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.models.base.model</span></code></a></p>
+<p>The network adaptation model according to Meigel/Horton et al, based on
+minimization of supply-demand mismatch, with a simplified metabolite uptake
+model though:</p>
+<blockquote>
+<div><p>Meigel et al, Flow rate of transport network controls uniform
+metabolite supply to tissue, Journal of the Royal Society Interface,
+2018</p>
+<p>Kramer&amp;Modes, On biological flow networks: Antagonism between
+hydrodynamic and metabolic stimuli as driver of topological
+transitions, arXiv:2111.04326</p>
+</div></blockquote>
+<p>The system’s cost function is given as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \sum_{e} \left[ \Phi_e-\Phi_0 \right]^2\]</div>
+<dl>
+<dt>Attributes:</dt><dd><p>pars (dict):</p>
+<blockquote>
+<div><p>The specific model parameters alpha_0, alpha_1 and demand Phi_0</p>
+</div></blockquote>
+<p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id41"><span class="problematic" id="id42">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id43"><span class="problematic" id="id44">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id45"><span class="problematic" id="id46">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id47"><span class="problematic" id="id48">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+<dt>get_stimuli_pars(self, flow, x_0)</dt><dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well
+as squared quantities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.meigel.meigel.calc_cost_stimuli">
+<span class="sig-name descname"><span class="pre">calc_cost_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.meigel.meigel.calc_cost_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>iterable:</p>
+<blockquote>
+<div><p>The computed gradient dF to the current cost function F, as well
+as F itself.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.meigel.meigel.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.meigel.meigel.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-goflow.models.kramer">
+<span id="goflow-models-kramer"></span><h1>goflow.models.kramer<a class="headerlink" href="#module-goflow.models.kramer" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.models.kramer.kramer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.models.kramer.</span></span><span class="sig-name descname"><span class="pre">kramer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pars:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.kramer.kramer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.models.base.model" title="goflow.models.base.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.models.base.model</span></code></a></p>
+<p>The network adaptation model for for two entangled networks, according
+to Kramer et al, based on minimization of noisy disspation-volume in
+combination with intertwinedness retrictions/couplings:</p>
+<blockquote>
+<div><p>Kramer and Modes, How to pare a pair: Topology control and pruning in
+intertwined complex networks, PRR, 2020</p>
+</div></blockquote>
+<p>The system’s cost function is given as:</p>
+<div class="math notranslate nohighlight">
+\[\Gamma = \sum_{e} \left( C_e \langle \Delta p_e^2 \rangle
++ a r_e^{2} \right) + b \sum_{ee'} \Delta r_{ee'}^{\varepsilon}\]</div>
+<dl>
+<dt>Attributes:</dt><dd><p>pars (dict):</p>
+<blockquote>
+<div><p>The specific model parameters p0 (growth rate), p1 (coupling), p2
+(volume penalty), p3 (fluctuation) and coupling exponent varepsilon.</p>
+</div></blockquote>
+<p>ivp_options (dict):</p>
+<blockquote>
+<div><p>Information to generate the internal solver_options. Providing t0,t1
+number of evaluation and x0.</p>
+</div></blockquote>
+<p>model_args (list):</p>
+<blockquote>
+<div><p>Model specific paramerets need to evaluate the update rules of the DS</p>
+</div></blockquote>
+<p>solver_options (dict):</p>
+<blockquote>
+<div><p>Specifying runtime and evaluation marks.</p>
+</div></blockquote>
+<p>events (dict):</p>
+<blockquote>
+<div><p>Events to consier, here in gernal flatlining events which allow for
+early termination of stiff simulations.</p>
+</div></blockquote>
+<p>null_decimals (in):</p>
+<blockquote>
+<div><p>description</p>
+</div></blockquote>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>init()</dt><dd><p>The model post_init function.</p>
+</dd>
+<dt>update_event_func()</dt><dd><p>Update the event function and ensures that solver_options are set.</p>
+</dd>
+<dt>flatlining_default(t, x_0, <a href="#id49"><span class="problematic" id="id50">*</span></a>args)</dt><dd><p>The default flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>flatlining_dynamic(t, x_0, <a href="#id51"><span class="problematic" id="id52">*</span></a>args)</dt><dd><p>The dynamic flatlining function for determining the terminal event
+of the dynamical system.</p>
+</dd>
+<dt>set_model_parameters(model_pars)</dt><dd><p>Set internal model arguments array.</p>
+</dd>
+<dt>set_solver_options(solv_opt)</dt><dd><p>Set internal solver_options and update event function.</p>
+</dd>
+<dt>calc_update_stimuli(t, x_0, <a href="#id53"><span class="problematic" id="id54">*</span></a>args)</dt><dd><p>The dynamic system’s temporal update rule, computing the gradient
+-dF for dx/dt.</p>
+</dd>
+<dt>calc_cost_stimuli(t, x_0, <a href="#id55"><span class="problematic" id="id56">*</span></a>args)</dt><dd><p>Computes the dynamic system’s Lyapunov function and its gradient.</p>
+</dd>
+<dt>get_stimuli_pars(self, flow, x_0)</dt><dd><p>Update flow &amp; pressure landscapes, recompute conductivity as well
+as squared quantities.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.kramer.kramer.calc_update_stimuli">
+<span class="sig-name descname"><span class="pre">calc_update_stimuli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.kramer.kramer.calc_update_stimuli" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dynamic system’s temporal update rule, computing the gradient -dF
+for dx/dt.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>array:</p>
+<blockquote>
+<div><p>The computed change dx to the state vector x_0.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.kramer.kramer.prune">
+<span class="sig-name descname"><span class="pre">prune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.kramer.kramer.prune" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether a vessel collapsed, i.e. negative radii appear during
+integration. If so, handle it by pruning the vessel.</p>
+<dl>
+<dt>Args:</dt><dd><p>t (float):</p>
+<blockquote>
+<div><p>Current time step in numeric ODE evaluation</p>
+</div></blockquote>
+<p>x_0 (array):</p>
+<blockquote>
+<div><p>Current state vector of the DS.</p>
+</div></blockquote>
+<p>args (iterable):</p>
+<blockquote>
+<div><p>Model specific tuple of parameters, needed to evaluate stimulus ]
+functions</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>int:</dt><dd><p>1: do not prunr and keep updating
+0: vessel collapsed, stop updating</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.kramer.kramer.set_solver_options">
+<span class="sig-name descname"><span class="pre">set_solver_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solv_opt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.kramer.kramer.set_solver_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal solver_options and update event function.</p>
+<dl>
+<dt>Args:</dt><dd><p>solv_opt (dict):</p>
+<blockquote>
+<div><p>Solver argument dictionary generated on program initilization.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.models.kramer.kramer.update_event_func">
+<span class="sig-name descname"><span class="pre">update_event_func</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#goflow.models.kramer.kramer.update_event_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the event function and ensures that solver_options are set.</p>
+<dl class="simple">
+<dt>Raises:</dt><dd><dl class="simple">
+<dt>Exception: n</dt><dd><p>Warning: Event handling got inadequadt event function,
+falling back to default</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">goflow.models.base</a></li>
+<li><a class="reference internal" href="#module-goflow.models.murray">goflow.models.murray</a></li>
+<li><a class="reference internal" href="#module-goflow.models.bohn">goflow.models.bohn</a></li>
+<li><a class="reference internal" href="#module-goflow.models.corson">goflow.models.corson</a></li>
+<li><a class="reference internal" href="#module-goflow.models.meigel">goflow.models.meigel</a></li>
+<li><a class="reference internal" href="#module-goflow.models.kramer">goflow.models.kramer</a></li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="adapter.html"
+                          title="previous chapter">goflow.adapter.init_ivp</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/models.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="adapter.html" title="goflow.adapter.init_ivp"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">go-with-the-flow  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="goflow.html" >goflow modules</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">goflow.models.base</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Felix Kramer.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

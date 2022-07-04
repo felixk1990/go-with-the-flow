@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Introduction &#8212; go-with-the-flow  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="goflow modules" href="goflow.html" />
+    <link rel="prev" title="Welcome to goflow’s documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="goflow.html" title="goflow modules"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to goflow’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">go-with-the-flow  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Introduction</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p>About goflow: This repository is all about simulating flow driven pruning in biological flow networks.</p>
+<section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>This module ‘goflow’ is the final of a series of pyton packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and dependends on the packages ‘kirchhoff’,’hailhydro’.</p>
+<p>What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br></p>
+<img src="https://render.githubusercontent.com/render/math?math=\dot{r}_i (t) = f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... ) "><p>The dynamic system f is usually constructed for a Lyapunov function L with <br></p>
+<img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 p_i^2r_i^4 %2B \alpha_0 r_i^2 %2B+..."><p>such that we get <br>
+<img src="https://render.githubusercontent.com/render/math?math=f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... )= -\frac{dL}{dr_i} "></p>
+<p>The package not only includes premade Lyapunov functions and flow/flux models but further offers custom functions to be provided by the user.</p>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>pip install goflow</p>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>First you have to create your rudimentary circuit/ flow network which yu want to evolve later:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">goflow.init_ivp</span> <span class="k">as</span> <span class="nn">gi</span>
+<span class="kn">import</span> <span class="nn">goflow.models</span> <span class="k">as</span> <span class="nn">gfm</span>
+
+<span class="n">cfp</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;hexagonal&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;periods&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;source&#39;</span><span class="p">:</span><span class="s1">&#39;dipole_border&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;plexus&#39;</span><span class="p">:</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">flow</span><span class="o">=</span><span class="n">gfm</span><span class="o">.</span><span class="n">initialize_flow_on_crystal</span><span class="p">(</span><span class="n">cfp</span><span class="p">)</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">()]</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">()]</span>
+
+<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">draw_weight_scaling</span><span class="o">=</span><span class="mf">2.</span>
+<span class="n">fig</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><img alt="plexus" src="gallery/plexus_murray.png" /></p>
+<p>Next you have to set the dynamical model (how are flows calculated, vessels adjusted during each adaptation step):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#set model and its parameters, here for example go for the classic Murray model (1926)</span>
+
+<span class="n">mp</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">&#39;alpha_0&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;alpha_1&#39;</span><span class="p">:</span><span class="mf">1.</span>
+<span class="p">}</span>
+<span class="n">murray</span><span class="o">=</span><span class="n">gfm</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s1">&#39;murray&#39;</span><span class="p">,</span><span class="n">pars</span><span class="o">=</span><span class="n">mp</span><span class="p">)</span>
+
+<span class="n">morpheus</span><span class="o">=</span><span class="n">gi</span><span class="o">.</span><span class="n">morph_dynamic</span><span class="p">(</span><span class="n">flow</span><span class="o">=</span><span class="n">flow</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">murray</span><span class="p">)</span>   
+<span class="n">sp</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">&#39;t0&#39;</span><span class="p">:</span> <span class="mf">0.</span><span class="p">,</span>
+    <span class="s1">&#39;t1&#39;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span>
+    <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s1">&#39;conductance&#39;</span><span class="p">],</span><span class="mf">0.25</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1">#numerically evaluate the system</span>
+<span class="n">nsol</span><span class="o">=</span><span class="n">morpheus</span><span class="o">.</span><span class="n">nsolve</span><span class="p">(</span><span class="n">murray</span><span class="o">.</span><span class="n">calc_update_stimuli</span><span class="p">,(</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;t0&#39;</span><span class="p">],</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;t1&#39;</span><span class="p">]),</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">murray</span><span class="o">.</span><span class="n">solver_options</span><span class="p">)</span>
+<span class="n">cost</span><span class="o">=</span><span class="p">[</span><span class="n">murray</span><span class="o">.</span><span class="n">calc_cost_stimuli</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="o">*</span><span class="n">murray</span><span class="o">.</span><span class="n">solver_options</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">())]</span>
+</pre></div>
+</div>
+<p>When you are done, plot dynamics of vessel development and the final structures.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#plot dynamic data such as radii and costs</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+
+<span class="n">cl</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,255,.1)&#39;</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">())]</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">nsol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">cl</span><span class="p">}))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><img alt="dynamics" src="gallery/dynamics_murray.png" /><br>
+You can customize what the interactive plots display:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">3.</span>
+<span class="n">fig</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="p">[</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">Q</span><span class="p">,</span> <span class="n">dP</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">calc_configuration_flow</span><span class="p">()</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">],</span> <span class="n">dP</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">calc_configuration_flow</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">(</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">,</span> <span class="n">color_edges</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">Q</span><span class="p">)],</span> <span class="n">linewidth</span><span class="o">=</span><span class="p">[</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><img alt="updated1" src="gallery/updated_murray1.png" />
+<img alt="updated2" src="gallery/updated_murray2.png" /></p>
+</section>
+<section id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pandas</span></code>,<code class="docutils literal notranslate"><span class="pre">networkx</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">kirchhoff</span></code>, <code class="docutils literal notranslate"><span class="pre">hailhydro</span></code>, <code class="docutils literal notranslate"><span class="pre">plotly</span></code></p>
+</section>
+<section id="gallery">
+<h1>Gallery<a class="headerlink" href="#gallery" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/HEAD"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>
+</section>
+<section id="acknowledgement">
+<h1>Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>Pre-customized models presentend and implemented here as given by:</p>
+<ul>
+<li><p>Murray, The Physiological Principle of Minimum Work, 1926</p></li>
+<li><p>Katifori et al, Damage and Fluctuations Induce Loops in Optimal Transport Networks, 2010</p></li>
+<li><p>Corson, Fluctuations and Redundancy in Optimal Transport Networks, 2010</p></li>
+<li><p>Hu and Cai, Adaptation and Optimization of Biological Transport Networks, 2013</p></li>
+<li><p>Kramer and Modes, How to pare a pair: Topology control and pruning in intertwined complex networks, 2020</p></li>
+</ul>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">goflow</span></code> written by Felix Kramer</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Introduction</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#gallery">Gallery</a></li>
+<li><a class="reference internal" href="#acknowledgement">Acknowledgement</a></li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">Welcome to goflow’s documentation!</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="goflow.html"
+                          title="next chapter">goflow modules</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intro.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="goflow.html" title="goflow modules"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to goflow’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">go-with-the-flow  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Introduction</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Felix Kramer.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

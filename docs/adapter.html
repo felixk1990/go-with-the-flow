@@ -1,0 +1,394 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>goflow.adapter.init_ivp &#8212; go-with-the-flow  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="goflow.models.base" href="models.html" />
+    <link rel="prev" title="goflow modules" href="goflow.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="goflow.models.base"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="goflow.html" title="goflow modules"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">go-with-the-flow  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="goflow.html" accesskey="U">goflow modules</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">goflow.adapter.init_ivp</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-goflow.adapter.init_ivp">
+<span id="goflow-adapter-init-ivp"></span><h1>goflow.adapter.init_ivp<a class="headerlink" href="#module-goflow.adapter.init_ivp" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.adapter.init_ivp.</span></span><span class="sig-name descname"><span class="pre">morph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">construct:</span> <span class="pre">networkx.classes.graph.Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Basic Class for simulating flow network adaption dynamics.</p>
+<p>‘Morph’ computes the long-term network development on the basis of
+flow and gradient descent. The class acts as a wrapper to ensure correct
+pre-/post-proccessing of the network’s data and output. Utilizing the
+modules ‘kirchhoff’ and ‘hailhydro’ as well as goflow.models.</p>
+<dl>
+<dt>Args:</dt><dd><p>construct (nx.Graph):</p>
+<blockquote>
+<div><p>A network plexus, recommended to be ‘kirchhoff’ circuit or an
+initialized ‘hailhydro’ flow/flux. Handling for deviations only
+provided for standard models.</p>
+</div></blockquote>
+<p>mode (string/model):</p>
+<blockquote>
+<div><p>A descriptive string for selection internal model object.</p>
+</div></blockquote>
+<p>args (tuple):</p>
+<blockquote>
+<div><p>A parameter tuple for evaluation of the model given a plexus.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>type: morph</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph.init_model_and_flow">
+<span class="sig-name descname"><span class="pre">init_model_and_flow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph.init_model_and_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set internal model and flow variables with constructor values.</p>
+<dl>
+<dt>Args:</dt><dd><p>None</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+<dt>Raises:</dt><dd><p>Exception:</p>
+<blockquote>
+<div><p>sys.exit(‘Terminate Program: No valid adaptation model provided.’)</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph.link_model_flow">
+<span class="sig-name descname"><span class="pre">link_model_flow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph.link_model_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer model and flow parameters to internal variables of solver.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>None</p>
+</dd>
+<dt>Returns:</dt><dd><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.adapter.init_ivp.</span></span><span class="sig-name descname"><span class="pre">morph_dynamic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">construct:</span> <span class="pre">networkx.classes.graph.Graph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#goflow.adapter.init_ivp.morph" title="goflow.adapter.init_ivp.morph"><code class="xref py py-class docutils literal notranslate"><span class="pre">goflow.adapter.init_ivp.morph</span></code></a></p>
+<p>Derived class definition from morph, for specific dynamic models.</p>
+<p>Defines explicit ODE solvers and customizable forward integration solvers.</p>
+<dl>
+<dt>Args:</dt><dd><p>construct (nx.Graph):</p>
+<blockquote>
+<div><p>A network plexus, recommended to be ‘kirchhoff’ circuit or an
+initialized ‘hailhydro’ flow/flux. Handling for deviations only
+provided for standard models.</p>
+</div></blockquote>
+<p>mode (string/model):</p>
+<blockquote>
+<div><p>A descriptive string for selection internal model object.</p>
+</div></blockquote>
+<p>args (tuple):</p>
+<blockquote>
+<div><p>A parameter tuple for evaluation of the model given a plexus.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>type: morph_dynamic</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic.autoSolve">
+<span class="sig-name descname"><span class="pre">autoSolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic.autoSolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default ODE solver/wrapper for given adaptation models.</p>
+<p>Based on methods of scipy.integrate, hence solver options are
+customizable via the internal model.solver_options attribute and align
+with scipy standards.</p>
+<dl>
+<dt>Args:</dt><dd><p>t_span (tuple):</p>
+<blockquote>
+<div><p>A tuple setting the linear range of values for
+explicit evaluation.</p>
+</div></blockquote>
+<p>x0 (array):</p>
+<blockquote>
+<div><p>An array of initial values to start the numeric integration of the
+dynamic system.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Iterable: Same set of return values as scipy.integrate.solve_ivp
+(1.7.3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic.nlogSolve">
+<span class="sig-name descname"><span class="pre">nlogSolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic.nlogSolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom ODE solver/wrapper for given adaptation models with logarithmic
+evaluation timescales.</p>
+<p>Based on methods of scipy.integrate, hence solver options are
+customizable via the internal model.solver_options attribute and align
+with scipy standards.</p>
+<dl>
+<dt>Args:</dt><dd><p>t_span (tuple):</p>
+<blockquote>
+<div><p>A tuple setting the logarithmic range of values for
+explicit evaluation.</p>
+</div></blockquote>
+<p>x0 (array):</p>
+<blockquote>
+<div><p>An array of initial values to start the numeric
+integration of the dynamic system.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Iterable: Same set of return values as scipy.integrate.solve_ivp
+(1.7.3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic.nsolve">
+<span class="sig-name descname"><span class="pre">nsolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic.nsolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom ODE solver/wrapper for given adaptation models with linear
+evaluation timescales and custom update function. Based on methods of
+scipy.integrate.</p>
+<dl>
+<dt>Args:</dt><dd><p>ds_func (callable function):</p>
+<blockquote>
+<div><p>The update function of the dynamic system, which is supposed to
+define dx/dt, according to scipy standards.</p>
+</div></blockquote>
+<p>t_span (tuple):</p>
+<blockquote>
+<div><p>A tuple setting the logarithmic range of values for
+explicit evaluation.</p>
+</div></blockquote>
+<p>x0 (array):</p>
+<blockquote>
+<div><p>An array of initial values to start the numeric
+integration of the dynamic system.</p>
+</div></blockquote>
+<p>kwargs (dict):</p>
+<blockquote>
+<div><p>Dictionary for setting solver options according to
+scipy.integrate.solve_ivp standards.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Iterable: Same set of return values as scipy.integrate.solve_ivp
+(1.7.3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic.nsolve_custom">
+<span class="sig-name descname"><span class="pre">nsolve_custom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic.nsolve_custom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom ODE solver onthe basis of Foward-Euler, for given adaptation
+models with custom evaluation timescales and step width and custom
+update function. Acts as a wrapper for nsolve_fw_euler.</p>
+<dl>
+<dt>Args:</dt><dd><p>ds_func (callable function):</p>
+<blockquote>
+<div><p>The update function of the dynamic system, which is supposed to</p>
+</div></blockquote>
+<p>define dx/dt, according to scipy standards.</p>
+<p>t_span (tuple):</p>
+<blockquote>
+<div><p>A tuple setting the logarithmic range of values for explicit
+evaluation.</p>
+</div></blockquote>
+<p>x0 (array):</p>
+<blockquote>
+<div><p>An array of initial values to start the numeric
+integration of the dynamic system.</p>
+</div></blockquote>
+<p>kwargs (dict):</p>
+<blockquote>
+<div><p>A dictionary setting custom solver options such as
+number of evaluations ‘sample’, number of steps ‘num_steps’</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Iterable: Tuple of two arrays (t, x(t))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic.nsolve_fw_euler">
+<span class="sig-name descname"><span class="pre">nsolve_fw_euler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic.nsolve_fw_euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom ODE solver onthe basis of Foward-Euler, for given adaptation
+models with custom evaluation timescales and step width and custom
+update function.</p>
+<dl>
+<dt>Args:</dt><dd><p>ds_func (callable):</p>
+<blockquote>
+<div><p>The update function of the dynamic system, which is supposed to
+define dx/dt, according to scipy standards.</p>
+</div></blockquote>
+<p>t_span (tuple):</p>
+<blockquote>
+<div><p>A tuple setting the logarithmic range of values for
+explicit evaluation.</p>
+</div></blockquote>
+<p>x0 (array):</p>
+<blockquote>
+<div><p>An array of initial values to start the numeric integration of the
+dynamic system.</p>
+</div></blockquote>
+<p>kwargs (dict):</p>
+<blockquote>
+<div><p>A dictionary setting custom solver options.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Iterable: Tuple of two arrays (t, x(t))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.morph_dynamic.set_integration_scale">
+<span class="sig-name descname"><span class="pre">set_integration_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.morph_dynamic.set_integration_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the sample rate for the given dynamic system.</p>
+<p>Given the pre-set number of computing steps and number of evaluations,
+Adjusts/increases the number of integration cycles such that last
+evaluation coincicdes with last cycle.</p>
+<dl>
+<dt>Args:</dt><dd><p>Num_steps (int):</p>
+<blockquote>
+<div><p>Number of integration steps to perform for a Forward-Euler scheme.</p>
+</div></blockquote>
+<p>sample(int):</p>
+<blockquote>
+<div><p>Number of desired function evaluations for output.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Iterable: Num_steps, sample_rate</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="goflow.adapter.init_ivp.proxy_solver">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">goflow.adapter.init_ivp.</span></span><span class="sig-name descname"><span class="pre">proxy_solver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_samples:</span> <span class="pre">list</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sol:</span> <span class="pre">list</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#goflow.adapter.init_ivp.proxy_solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A proxy solver class for custom numeric integration.</p>
+<dl>
+<dt>Args:</dt><dd><p>tsamples (array):</p>
+<blockquote>
+<div><p>Setting the internal sample time points.</p>
+</div></blockquote>
+<p>sol (array):</p>
+<blockquote>
+<div><p>Time series of data to be stored internally.</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>type: proxy_solver</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="goflow.html"
+                          title="previous chapter">goflow modules</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="models.html"
+                          title="next chapter">goflow.models.base</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/adapter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="goflow.models.base"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="goflow.html" title="goflow modules"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">go-with-the-flow  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="goflow.html" >goflow modules</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">goflow.adapter.init_ivp</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Felix Kramer.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>
