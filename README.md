@@ -93,8 +93,7 @@ fig.show()
 ```
 ![updated1](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray1.png)<br>
 ![updated2](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray2.png)<br>
-![test](https://github.com/felixk1990/go-with-the-flow/blob/main/gallery/test.html)
-></iframe>
+![test](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/test.html)
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
