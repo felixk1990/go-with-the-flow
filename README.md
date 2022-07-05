@@ -1,4 +1,7 @@
 # goflow
+```html
+https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/test.html
+```
 This repository is all about simulating flow driven pruning in biological flow networks.
 ##  Introduction
 This module 'goflow' is the final of a series of pyton packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and dependends on the packages 'kirchhoff','hailhydro'.
