@@ -42,26 +42,39 @@ fig.show()
 
 Next you have to set the dynamical model (how are flows calculated, vessels adjusted during each adaptation step):
 ```
-#set model and its parameters, here for example go for the classic Murray model (1926)
-
+# set plexus parameters
+pars_src = {
+    'modesSRC': 'root_geometric'
+}
+pars_plx = {
+    'modePLX':'default',
+}
 # set model and model parameters
-mp={
-    'alpha_0':1,
+pars_model = {
+    'alpha_0':1.,
     'alpha_1':1.
 }
-murray=gfm.init(model='murray',pars=mp)
 
-# initialize dynamic system and set integration parameters
-morpheus=gi.morph_dynamic(flow=flow,model=murray)   
-sp={
-    't0': 0.,
-    't1': 5.5,
-    'x0': np.power(morpheus.flow.circuit.edges['conductivity']/morpheus.flow.circuit.scales['conductance'],0.25),
+# # initialize dynamic system and set integration parameters
+morpheus = gi.morph_dynamic(C, 'murray', [pars_model, pars_src, pars_plx]) 
+morpheus.evals = 200
+
+# numerically evaluate the system
+cnd = morpheus.flow.circuit.edges['conductivity']
+cnd_scale = morpheus.flow.circuit.scales['conductance']
+
+sp = {
+    't0': 1e-05,
+    't1': 4.,
+    'x0': np.power(cnd/cnd_scale,0.25)*0.1,
 }
+nsol = morpheus.nlogSolve((sp['t0'],sp['t1']), sp['x0'])
+# print(nsol)
 
-#numerically evaluate the system
-nsol=morpheus.nsolve(murray.calc_update_stimuli,(sp['t0'],sp['t1']),sp['x0'], **murray.solver_options)
-cost=[murray.calc_cost_stimuli(t,y,*murray.solver_options['args']) for t,y in zip(nsol.t,nsol.y.transpose())]
+dataPoints = zip(nsol.t,nsol.y.transpose())
+murrayModel = morpheus.model
+args = murrayModel.solver_options['args']
+cost = [murrayModel.calc_cost_stimuli(t, y, *args)[0] for t, y in dataPoints]
 ```
 When you are done, plot dynamics of vessel development and the final structures.
 ```
