@@ -1,6 +1,6 @@
 # goflow
 
-<iframe src="https://felixk1990.github.io/go-with-the-flow/test.html" title="example"></iframe>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/test.html" title="example" seamless="seamless" height="525" width="100%"></iframe>
 
 This repository is all about simulating flow driven pruning in biological flow networks.
 ##  Introduction
