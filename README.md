@@ -23,23 +23,19 @@ pip install goflow
 First you have to create your rudimentary circuit/ flow network which yu want to evolve later:
 ```
 import numpy as np
-import goflow.init_ivp as gi
-import goflow.models as gfm
+import kirchhoff.circuit_init as kfi
+from goflow.adapter import init_ivp as gi
 
-# #initialize circuit+flow pattern
-cfp={
-    'type': 'hexagonal',
-    'periods': 3,
-    'source':'dipole_border',
-    'plexus':'default',
-}
-flow=gfm.initialize_flow_on_crystal(cfp)
-flow.circuit.nodes['label'] = [n for n in flow.circuit.G.nodes()]
-flow.circuit.edges['label'] = [e for e in flow.circuit.G.edges()]
+# #initialize plexus+flow pattern
+init_flow=dict(
+    crystal_type='triagonal_planar',
+    periods= 3,
+)
+
+C = kfi.initialize_circuit_from_crystal(**init_flow)
 
 # plot initial network with data of choice
-flow.circuit.draw_weight_scaling=2.
-fig=flow.circuit.plot_circuit()
+fig = C.plot_circuit()
 fig.show()
 ```
 ![plexus](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/plexus_murray.png)
