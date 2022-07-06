@@ -96,7 +96,7 @@ fig.show()
 ![updated1](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray1.png)<br>
 ![updated2](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray2.png)<br>
 
-Further examples: ![Binder](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
+Further examples: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
