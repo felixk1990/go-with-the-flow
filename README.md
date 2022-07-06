@@ -1,14 +1,6 @@
 # goflow
 
-<iframe 
-src="https://felixk1990.github.io/go-with-the-flow/test.html" >
-</iframe>
-
-such that we get <br>
-
-<img src="https://felixk1990.github.io/go-with-the-flow/test.html">
-
-![test](https://felixk1990.github.io/go-with-the-flow/test.html)
+<iframe src="https://felixk1990.github.io/go-with-the-flow/test.html" title="example"></iframe>
 
 This repository is all about simulating flow driven pruning in biological flow networks.
 ##  Introduction
