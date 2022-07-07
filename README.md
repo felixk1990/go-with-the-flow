@@ -38,7 +38,7 @@ C = kfi.initialize_circuit_from_crystal(**init_flow)
 fig = C.plot_circuit()
 fig.show()
 ```
-![plexus](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/plexus_murray.png)
+![plexus](./gallery/plexus_murray.png)
 
 Next you have to set the dynamical model (how are flows calculated, vessels adjusted during each adaptation step):
 ```
@@ -56,7 +56,7 @@ pars_model = {
 }
 
 # # initialize dynamic system and set integration parameters
-morpheus = gi.morph_dynamic(C, 'murray', [pars_model, pars_src, pars_plx]) 
+morpheus = gi.morph_dynamic(C, 'murray', [pars_model, pars_src, pars_plx])
 morpheus.evals = 200
 
 # numerically evaluate the system
@@ -76,34 +76,118 @@ murrayModel = morpheus.model
 args = murrayModel.solver_options['args']
 cost = [murrayModel.calc_cost_stimuli(t, y, *args)[0] for t, y in dataPoints]
 ```
-When you are done, plot dynamics of vessel development and the final structures.
+When you are done, plot dynamics of vessel development:
 ```
-#plot dynamic data such as radii and costs
-import plotly.graph_objects as go
+# # plot dynamic data such as radii and costs
+import matplotlib.pyplot as plt
+fig,axs=plt.subplots(2,1,figsize=(12,6),sharex=True)
+axs[0].plot(nsol.t,nsol.y.transpose(),alpha=0.1,color='b')
+axs[1].plot(nsol.t,cost,alpha=0.2,color='b')
 
-cl='rgba(0,0,255,.1)'
-names = [str(s) for s in list(flow.circuit.G.edges())]
-fig = go.Figure()
-for i, c in enumerate(nsol.y):
-    fig.add_trace(go.Scatter(x=nsol.t, y=c, mode='lines', name=names[i], line={'color': cl}))
-fig.show()
-```
-![dynamics](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/dynamics_murray.png)<br>
-You can customize what the interactive plots display:
-```
-# plot final network
-flow.circuit.edges['conductivity']=nsol.y.transpose()[-1]*3.
-fig=flow.circuit.plot_circuit(linewidth=[flow.circuit.edges['conductivity']])
-fig.show()
+for i in range(2):
+    axs[i].grid(True)
+    axs[i].set_xscale('log')
 
-# plot network with data of choice
-Q, dP = flow.calc_configuration_flow()
-flow.circuit.edges['flow_rate'], dP=flow.calc_configuration_flow()
-fig=flow.circuit.plot_circuit('flow_rate', color_edges=[np.absolute(Q)], linewidth=[flow.circuit.edges['conductivity']])
-fig.show()
+axs[1].set_xlabel(r'time $t$')
+axs[0].set_ylabel(r'radii $r$')
+axs[1].set_ylabel(r'metabolic cost $\Gamma$')
+axs[1].set_yscale('log')
+plt.show()
 ```
-![updated1](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray1.png)<br>
-![updated2](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray2.png)<br>
+![dynamics](./gallery/dynamics_murray.png)<br>
+If you like you may generate animations just as easily, just do the following:
+```
+# plot the network adaptation as a gif
+kwargs = dict(
+    length=10000,
+#     loop=1,
+)
+opts = dict(
+    gif_name = 'murray_triagonal_plexus.gif',
+    gif_path = '../gallery'
+)
+gif = GIF(**opts)
+
+# Construct list of frames
+frames = []
+
+@capture(gif)
+def newfig(y):
+
+    morpheus.flow.circuit.edges['conductivity'] = y
+    lw = morpheus.flow.circuit.edges['conductivity']
+    z = np.divide(lw, np.amax(lw))
+
+    aux = {
+        'color_nodes': ['#030512'],
+        'color_edges': [z],
+        'colormap': ['RdPu'],
+    }
+
+    figX = morpheus.flow.circuit.plot_circuit(linewidth = [10.*lw], **aux)
+
+    return figX
+
+for y in nsol.y.transpose()[:]:
+    frame = newfig(y)
+    frames.append(frame)
+
+gif.create_gif(**kwargs) # generate gif
+# plot the radii dynamics
+opts['gif_name'] = 'murray_triagonal_dynm.gif'
+gif = GIF(**opts)
+# Construct list of frames
+frames = []
+
+y_min = np.amin(nsol.y)
+y_max = np.amax(nsol.y)
+x_min = np.amin(nsol.t)
+x_max = np.amax(nsol.t)
+
+@capture(gif)
+def plotDynm(y,t):
+
+    fig = go.Figure()
+
+    for ys in Y:
+        fig.add_trace(
+            go.Scatter(
+                x=T,
+                y= ys,
+                mode='lines',
+                line=dict(color='rgba(0,0,255,0.1)'),
+            )
+        )
+    fig.update_layout( dict(
+#         xaxis=dict(range=[x_min, x_max], autorange=False),
+#         yaxis=dict(range=[y_min, y_max], autorange=False),
+        showlegend =  False,
+        )
+    )
+    fig.update_xaxes(type="log",
+                     range=[*np.log10([x_min, x_max])]
+                    )# log range: 10^0=1, 10^5=100000
+    fig.update_yaxes(range=[y_min, y_max]) # linear range
+
+    return fig
+
+for i,t in enumerate(nsol.t):
+
+    try:
+        Y = nsol.y[:,:i+1]
+        T = nsol.t[:i+1]
+
+    except:
+        Y = nsol.y[:,:]
+        T = nsol.t[:]
+
+    frame = plotDynm(Y, T)
+    frames.append(frame)
+
+gif.create_gif(**kwargs) # generate gif
+```
+![updated1](./gallery/murray_triagonal_plexus.gif)<br>
+![updated2](./gallery/murray_triagonal_dynm.gif)<br>
 
 Further examples: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
