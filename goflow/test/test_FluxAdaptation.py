@@ -2,8 +2,8 @@
 # @Date:   2022-06-29T13:16:22+02:00
 # @Email:  felixuwekramer@proton.me
 # @Filename: test_FluxAdaptation.py
-@Last modified by:   felix
-@Last modified time: 2022-07-01T16:06:05+02:00
+# @Last modified by:   felix
+# @Last modified time: 2022-07-01T16:06:05+02:00
 
 
 import numpy as np
