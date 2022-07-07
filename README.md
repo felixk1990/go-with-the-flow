@@ -3,7 +3,9 @@
 This repository is all about simulating flow driven pruning in biological flow networks. For full package documentation see:
 <https://felixk1990.github.io/go-with-the-flow/>
 ##  Introduction
-This module 'goflow' is the final of a series of pyton packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and dependends on the packages 'kirchhoff','hailhydro'.
+Biological transport networks are dynamic systems developing constantly, to be found where ever you may look. The common, if not universal feature is that all such networks grow from a redundant initial plexus (a rudimentary network) into their final structure on the onset of flow. E.g. see the slime mold physarum in the little movie below, rebuilding the Tokyo railway system from scratch (Tero et al, Rules for Biologically Inspired Adaptive Network Design, Nature, 2010).
+![physarum](./gallery/tokyoPhysarum.gif)
+This module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff','hailhydro'.
 
 What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br>
 
