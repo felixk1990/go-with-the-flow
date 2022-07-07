@@ -95,101 +95,12 @@ axs[1].set_yscale('log')
 plt.show()
 ```
 ![dynamics](./gallery/dynamics_murray.png)<br>
-If you like you may generate animations just as easily, just do the following:
-```
-# plot the network adaptation as a gif
-kwargs = dict(
-    length=10000,
-#     loop=1,
-)
-opts = dict(
-    gif_name = 'murray_triagonal_plexus.gif',
-    gif_path = '../gallery'
-)
-gif = GIF(**opts)
+If you like you may generate interactive plots with plotly or animations just as easily, e.g. see the examples in the gallery section:
 
-# Construct list of frames
-frames = []
-
-@capture(gif)
-def newfig(y):
-
-    morpheus.flow.circuit.edges['conductivity'] = y
-    lw = morpheus.flow.circuit.edges['conductivity']
-    z = np.divide(lw, np.amax(lw))
-
-    aux = {
-        'color_nodes': ['#030512'],
-        'color_edges': [z],
-        'colormap': ['RdPu'],
-    }
-
-    figX = morpheus.flow.circuit.plot_circuit(linewidth = [10.*lw], **aux)
-
-    return figX
-
-for y in nsol.y.transpose()[:]:
-    frame = newfig(y)
-    frames.append(frame)
-
-gif.create_gif(**kwargs) # generate gif
-# plot the radii dynamics
-opts['gif_name'] = 'murray_triagonal_dynm.gif'
-gif = GIF(**opts)
-# Construct list of frames
-frames = []
-
-y_min = np.amin(nsol.y)
-y_max = np.amax(nsol.y)
-x_min = np.amin(nsol.t)
-x_max = np.amax(nsol.t)
-
-@capture(gif)
-def plotDynm(y,t):
-
-    fig = go.Figure()
-
-    for ys in Y:
-        fig.add_trace(
-            go.Scatter(
-                x=T,
-                y= ys,
-                mode='lines',
-                line=dict(color='rgba(0,0,255,0.1)'),
-            )
-        )
-    fig.update_layout( dict(
-#         xaxis=dict(range=[x_min, x_max], autorange=False),
-#         yaxis=dict(range=[y_min, y_max], autorange=False),
-        showlegend =  False,
-        )
-    )
-    fig.update_xaxes(type="log",
-                     range=[*np.log10([x_min, x_max])]
-                    )# log range: 10^0=1, 10^5=100000
-    fig.update_yaxes(range=[y_min, y_max]) # linear range
-
-    return fig
-
-for i,t in enumerate(nsol.t):
-
-    try:
-        Y = nsol.y[:,:i+1]
-        T = nsol.t[:i+1]
-
-    except:
-        Y = nsol.y[:,:]
-        T = nsol.t[:]
-
-    frame = plotDynm(Y, T)
-    frames.append(frame)
-
-gif.create_gif(**kwargs) # generate gif
-```
 ![updated1](./gallery/murray_triagonal_plexus.gif)<br>
 ![updated2](./gallery/murray_triagonal_dynm.gif)<br>
 
-Further examples: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
+Further examples and recipes: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
