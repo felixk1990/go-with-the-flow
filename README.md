@@ -3,15 +3,12 @@
 This repository is all about simulating flow driven pruning in biological flow networks. For full package documentation see:
 <https://felixk1990.github.io/go-with-the-flow/>
 ##  Introduction
-Biological transport networks are dynamic systems developing constantly, to be found where ever you may look. The common, if not universal feature is that all such networks grow from a redundant initial plexus (a rudimentary network) into their final structure on the onset of flow. E.g. see the slime mold physarum in the little movie below, rebuilding the Tokyo railway system from scratch (Tero et al, Rules for Biologically Inspired Adaptive Network Design, Nature, 2010).
-<br>
-
-![physarum](./gallery/tokyoPhysarum.gif)
-
-<br>
-This module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff','hailhydro'.
+The module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff','hailhydro'.
 
 What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br>
+
+![katifori](./gallery/ronellenfitsch)<br>
+[From: Ronellenfitsch et al, arXiv:1707.03074v1]
 
 <img src="https://render.githubusercontent.com/render/math?math=\dot{r}_i (t) = f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... ) ">
 
@@ -101,12 +98,8 @@ axs[1].set_yscale('log')
 plt.show()
 ```
 ![dynamics](./gallery/dynamics_murray.png)<br>
-If you like you may generate interactive plots with plotly or animations just as easily, e.g. see the examples in the gallery section:
-
-![updated1](./gallery/murray_triagonal_plexus.gif)<br>
-![updated2](./gallery/murray_triagonal_dynm.gif)<br>
-
-Further examples and recipes: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
+If you like you may generate interactive plots with plotly or animations just as easily. See the documentation pages or exploref urther examples and recipes: <br>
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
 ##  Gallery
