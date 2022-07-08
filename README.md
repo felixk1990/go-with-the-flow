@@ -22,7 +22,7 @@ such that we get <br>
 The package not only includes premade Lyapunov functions and flow/flux models but further offers custom functions to be provided by the user.
 ##  Installation
 ```
-pip install kirchhoff hailhydro goflow
+pip install goflow
 ```
 ##  Usage
 First you have to create your rudimentary circuit/ flow network which you want to evolve later:
@@ -104,7 +104,17 @@ plt.show()
 If you like you may generate interactive plots with plotly or animations just as easily. See the documentation pages or explore further examples and recipes: <br>
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
-``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
+``` 
+hailhydro==0.1.0
+kirchhoff==0.2.6
+line_profiler==3.0.2
+networkx==2.5
+numpy==1.21.2
+scipy==1.7.3
+plotly==5.6.0
+pandas==1.4.1
+matplotlib==3.5.1
+```
 
 ## Acknowledgement
 * Pre-customized models presentend and implemented here as given by:
