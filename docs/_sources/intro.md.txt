@@ -108,9 +108,9 @@ for i, ys in enumerate(nsol.y):
 fig.update_xaxes(type="log")
 fig.show()
 ```
-<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus"></iframe><br>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics"></iframe><br>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus" width="100%" height="300" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics" width="100%" height="300" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final" width="100%" height="300" style="border:none;"></iframe><br>
 
 If you like you may generate animations just as easily, e.g. see the examples in the gallery section:
 
