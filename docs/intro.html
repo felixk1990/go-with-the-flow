@@ -52,8 +52,8 @@ This repository is all about simulating flow driven pruning in biological flow n
 <p>Biological transport networks are dynamic systems developing constantly, to be found where ever you may look. The common, if not universal feature is that all such networks grow from a redundant initial plexus (a rudimentary network) into their final structure on the onset of flow. E.g. see the slime mold physarum in the little movie below, rebuilding the Tokyo railway system from scratch (Tero et al, Rules for Biologically Inspired Adaptive Network Design, Nature, 2010).
 <br></p>
 <p><img alt="physarum" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/tokyoPhysarum.gif" /></p>
+<br><p><img alt="katifori" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/ronellenfitsch.png" /></p>
 <br>
-![katifori](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/ronellenfitsch.png)<br>
 [From: Ronellenfitsch et al, arXiv:1707.03074v1]<br><p>This module ‘goflow’ is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages ‘kirchhoff’,’hailhydro’.</p>
 <p>What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br></p>
 <img src="https://render.githubusercontent.com/render/math?math=\dot{r}_i (t) = f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... ) "><p>The dynamic system f is usually constructed for a Lyapunov function L with <br></p>
@@ -147,9 +147,9 @@ This repository is all about simulating flow driven pruning in biological flow n
 <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus" width="100%" height="300" style="border:none;"></iframe><br>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics" width="100%" height="300" style="border:none;"></iframe><br>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final" width="100%" height="300" style="border:none;"></iframe><br><p>If you like you may generate animations just as easily, e.g. see the examples in the gallery section:</p>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus" width="100%" height="600" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics" width="100%" height="800" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final" width="100%" height="600" style="border:none;"></iframe><br><p>If you like you may generate animations just as easily, e.g. see the examples in the gallery section:</p>
 <p><img alt="updated1" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/murray_triagonal_plexus.gif" /><br>
 <img alt="updated2" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/murray_triagonal_dynm.gif" /><br></p>
 <p>Further examples and recipes: <a class="reference external" href="https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>

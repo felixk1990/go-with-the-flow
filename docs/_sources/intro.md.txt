@@ -7,7 +7,10 @@ Biological transport networks are dynamic systems developing constantly, to be f
 ![physarum](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/tokyoPhysarum.gif)
 
 <br>
-![katifori](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/ronellenfitsch.png)<br>
+
+![katifori](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/ronellenfitsch.png)
+
+<br>
 [From: Ronellenfitsch et al, arXiv:1707.03074v1]<br>
 
 This module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff','hailhydro'.
@@ -108,9 +111,9 @@ for i, ys in enumerate(nsol.y):
 fig.update_xaxes(type="log")
 fig.show()
 ```
-<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus" width="100%" height="300" style="border:none;"></iframe><br>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics" width="100%" height="300" style="border:none;"></iframe><br>
-<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final" width="100%" height="300" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus" width="100%" height="600" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics" width="100%" height="800" style="border:none;"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final" width="100%" height="600" style="border:none;"></iframe><br>
 
 If you like you may generate animations just as easily, e.g. see the examples in the gallery section:
 
