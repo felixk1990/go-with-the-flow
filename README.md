@@ -22,8 +22,9 @@ such that we get <br>
 The package not only includes premade Lyapunov functions and flow/flux models but further offers custom functions to be provided by the user.
 ##  Installation
 pip install goflow
+pip install requirements
 ##  Usage
-First you have to create your rudimentary circuit/ flow network which yu want to evolve later:
+First you have to create your rudimentary circuit/ flow network which you want to evolve later:
 ```
 import numpy as np
 import kirchhoff.circuit_init as kfi
