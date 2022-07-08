@@ -3,12 +3,12 @@
 This repository is all about simulating flow driven pruning in biological flow networks. For full package documentation see:
 <https://felixk1990.github.io/go-with-the-flow/>
 ##  Introduction
-The module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff','hailhydro'.
+The module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff', 'hailhydro'.<br>
+
+![katifori](./gallery/ronellenfitsch.png)<br>
+[From: Ronellenfitsch et al, arXiv:1707.03074v1]<br>
 
 What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br>
-
-![katifori](./gallery/ronellenfitsch)<br>
-[From: Ronellenfitsch et al, arXiv:1707.03074v1]
 
 <img src="https://render.githubusercontent.com/render/math?math=\dot{r}_i (t) = f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... ) ">
 
@@ -98,7 +98,8 @@ axs[1].set_yscale('log')
 plt.show()
 ```
 ![dynamics](./gallery/dynamics_murray.png)<br>
-If you like you may generate interactive plots with plotly or animations just as easily. See the documentation pages or exploref urther examples and recipes: <br>
+![final](./gallery/final_murray.png)<br>
+If you like you may generate interactive plots with plotly or animations just as easily. See the documentation pages or explore further examples and recipes: <br>
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
 ``` pandas ```,``` networkx ```, ``` numpy ```, ``` scipy ```, ``` kirchhoff ```, ``` hailhydro ```, ```plotly```
