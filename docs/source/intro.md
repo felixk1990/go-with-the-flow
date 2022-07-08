@@ -4,10 +4,10 @@ This repository is all about simulating flow driven pruning in biological flow n
 Biological transport networks are dynamic systems developing constantly, to be found where ever you may look. The common, if not universal feature is that all such networks grow from a redundant initial plexus (a rudimentary network) into their final structure on the onset of flow. E.g. see the slime mold physarum in the little movie below, rebuilding the Tokyo railway system from scratch (Tero et al, Rules for Biologically Inspired Adaptive Network Design, Nature, 2010).
 <br>
 
-![physarum](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/tokyoPhysarum.gif)
+![physarum](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/tokyoPhysarum.gif)
 
 <br>
-![katifori](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/ronellenfitsch.png)<br>
+![katifori](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/ronellenfitsch.png)<br>
 [From: Ronellenfitsch et al, arXiv:1707.03074v1]<br>
 
 This module 'goflow' is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages 'kirchhoff','hailhydro'.
@@ -114,8 +114,8 @@ fig.show()
 
 If you like you may generate animations just as easily, e.g. see the examples in the gallery section:
 
-![updated1](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/murray_triagonal_plexus.gif)<br>
-![updated2](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/murray_triagonal_dynm.gif)<br>
+![updated1](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/murray_triagonal_plexus.gif)<br>
+![updated2](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/gh-pages/gallery/murray_triagonal_dynm.gif)<br>
 
 Further examples and recipes: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
