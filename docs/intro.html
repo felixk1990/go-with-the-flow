@@ -49,7 +49,12 @@
 This repository is all about simulating flow driven pruning in biological flow networks.</p>
 <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>This module ‘goflow’ is the final of a series of pyton packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and dependends on the packages ‘kirchhoff’,’hailhydro’.</p>
+<p>Biological transport networks are dynamic systems developing constantly, to be found where ever you may look. The common, if not universal feature is that all such networks grow from a redundant initial plexus (a rudimentary network) into their final structure on the onset of flow. E.g. see the slime mold physarum in the little movie below, rebuilding the Tokyo railway system from scratch (Tero et al, Rules for Biologically Inspired Adaptive Network Design, Nature, 2010).
+<br></p>
+<p><img alt="physarum" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/tokyoPhysarum.gif" /></p>
+<br>
+![katifori](https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/ronellenfitsch.png)<br>
+[From: Ronellenfitsch et al, arXiv:1707.03074v1]<br><p>This module ‘goflow’ is the final of a series of python packages encompassing a set of class and method implementations for a kirchhoff network datatype, in order to to calculate flow/flux on lumped parameter model circuits and their corresponding adaptation. The flow/flux objects are embedded in the kirchhoff networks, and can be altered independently from the underlying graph structure. This is meant for fast(er) and efficient computation and depends on the packages ‘kirchhoff’,’hailhydro’.</p>
 <p>What does it do: Modelling morphogenesis of capillary networks which can be modelled as Kirchhoff networks, and calculate its response given flow q/ pressure dp/flux j based stimuli functions. We generally assume Hagen-Poiseulle flow and first order solution transport phenomena Given the radii r of such vessel networks we simulate its adaptation as an ODE system with <br></p>
 <img src="https://render.githubusercontent.com/render/math?math=\dot{r}_i (t) = f_i( \lbrace r \rbrace, \lbrace q \rbrace, \lbrace j \rbrace, ... ) "><p>The dynamic system f is usually constructed for a Lyapunov function L with <br></p>
 <img src="https://render.githubusercontent.com/render/math?math=L = \sum_i \alpha_1 p_i^2r_i^4 %2B \alpha_0 r_i^2 %2B+..."><p>such that we get <br>
@@ -58,86 +63,100 @@ This repository is all about simulating flow driven pruning in biological flow n
 </section>
 <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>pip install goflow</p>
+<p>pip install kirchhoff hailhydro goflow</p>
 </section>
 <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
-<p>First you have to create your rudimentary circuit/ flow network which yu want to evolve later:</p>
+<p>First you have to create your rudimentary circuit/ flow network which you want to evolve later:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">goflow.init_ivp</span> <span class="k">as</span> <span class="nn">gi</span>
-<span class="kn">import</span> <span class="nn">goflow.models</span> <span class="k">as</span> <span class="nn">gfm</span>
+<span class="kn">import</span> <span class="nn">kirchhoff.circuit_init</span> <span class="k">as</span> <span class="nn">kfi</span>
+<span class="kn">from</span> <span class="nn">goflow.adapter</span> <span class="kn">import</span> <span class="n">init_ivp</span> <span class="k">as</span> <span class="n">gi</span>
 
-<span class="n">cfp</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;hexagonal&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;periods&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="s1">&#39;source&#39;</span><span class="p">:</span><span class="s1">&#39;dipole_border&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;plexus&#39;</span><span class="p">:</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+<span class="n">init_flow</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+    <span class="n">crystal_type</span><span class="o">=</span><span class="s1">&#39;triagonal_planar&#39;</span><span class="p">,</span>
+    <span class="n">periods</span><span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">kfi</span><span class="o">.</span><span class="n">initialize_circuit_from_crystal</span><span class="p">(</span><span class="o">**</span><span class="n">init_flow</span><span class="p">)</span>
+
+<span class="n">pars_src</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;modesSRC&#39;</span><span class="p">:</span> <span class="s1">&#39;root_geometric&#39;</span>
 <span class="p">}</span>
-<span class="n">flow</span><span class="o">=</span><span class="n">gfm</span><span class="o">.</span><span class="n">initialize_flow_on_crystal</span><span class="p">(</span><span class="n">cfp</span><span class="p">)</span>
-<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">()]</span>
-<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">()]</span>
-
-<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">draw_weight_scaling</span><span class="o">=</span><span class="mf">2.</span>
-<span class="n">fig</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">()</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p><img alt="plexus" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/plexus_murray.png" /></p>
-<p>Next you have to set the dynamical model (how are flows calculated, vessels adjusted during each adaptation step):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#set model and its parameters, here for example go for the classic Murray model (1926)</span>
-
-<span class="n">mp</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;alpha_0&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+<span class="n">pars_plx</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;modePLX&#39;</span><span class="p">:</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">pars_model</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;alpha_0&#39;</span><span class="p">:</span><span class="mf">1.</span><span class="p">,</span>
     <span class="s1">&#39;alpha_1&#39;</span><span class="p">:</span><span class="mf">1.</span>
 <span class="p">}</span>
-<span class="n">murray</span><span class="o">=</span><span class="n">gfm</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s1">&#39;murray&#39;</span><span class="p">,</span><span class="n">pars</span><span class="o">=</span><span class="n">mp</span><span class="p">)</span>
 
-<span class="n">morpheus</span><span class="o">=</span><span class="n">gi</span><span class="o">.</span><span class="n">morph_dynamic</span><span class="p">(</span><span class="n">flow</span><span class="o">=</span><span class="n">flow</span><span class="p">,</span><span class="n">model</span><span class="o">=</span><span class="n">murray</span><span class="p">)</span>   
-<span class="n">sp</span><span class="o">=</span><span class="p">{</span>
-    <span class="s1">&#39;t0&#39;</span><span class="p">:</span> <span class="mf">0.</span><span class="p">,</span>
-    <span class="s1">&#39;t1&#39;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span>
-    <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s1">&#39;conductance&#39;</span><span class="p">],</span><span class="mf">0.25</span><span class="p">),</span>
+<span class="n">morpheus</span> <span class="o">=</span> <span class="n">gi</span><span class="o">.</span><span class="n">morph_dynamic</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="s1">&#39;murray&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">pars_model</span><span class="p">,</span> <span class="n">pars_src</span><span class="p">,</span> <span class="n">pars_plx</span><span class="p">])</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">evals</span> <span class="o">=</span> <span class="mi">200</span>
+
+<span class="n">cnd</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span>
+<span class="n">cnd_scale</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">scales</span><span class="p">[</span><span class="s1">&#39;conductance&#39;</span><span class="p">]</span>
+
+<span class="n">sp</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;t0&#39;</span><span class="p">:</span> <span class="mf">1e-05</span><span class="p">,</span>
+    <span class="s1">&#39;t1&#39;</span><span class="p">:</span> <span class="mf">4.</span><span class="p">,</span>
+    <span class="s1">&#39;x0&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">cnd</span><span class="o">/</span><span class="n">cnd_scale</span><span class="p">,</span><span class="mf">0.25</span><span class="p">)</span><span class="o">*</span><span class="mf">0.1</span><span class="p">,</span>
 <span class="p">}</span>
+<span class="n">nsol</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">nlogSolve</span><span class="p">((</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;t0&#39;</span><span class="p">],</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;t1&#39;</span><span class="p">]),</span> <span class="n">sp</span><span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">])</span>
 
-<span class="c1">#numerically evaluate the system</span>
-<span class="n">nsol</span><span class="o">=</span><span class="n">morpheus</span><span class="o">.</span><span class="n">nsolve</span><span class="p">(</span><span class="n">murray</span><span class="o">.</span><span class="n">calc_update_stimuli</span><span class="p">,(</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;t0&#39;</span><span class="p">],</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;t1&#39;</span><span class="p">]),</span><span class="n">sp</span><span class="p">[</span><span class="s1">&#39;x0&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">murray</span><span class="o">.</span><span class="n">solver_options</span><span class="p">)</span>
-<span class="n">cost</span><span class="o">=</span><span class="p">[</span><span class="n">murray</span><span class="o">.</span><span class="n">calc_cost_stimuli</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="o">*</span><span class="n">murray</span><span class="o">.</span><span class="n">solver_options</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span><span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">())]</span>
+<span class="n">dataPoints</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+<span class="n">murrayModel</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">model</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">murrayModel</span><span class="o">.</span><span class="n">solver_options</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]</span>
+<span class="n">cost</span> <span class="o">=</span> <span class="p">[</span><span class="n">murrayModel</span><span class="o">.</span><span class="n">calc_cost_stimuli</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">dataPoints</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>When you are done, plot dynamics of vessel development and the final structures.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#plot dynamic data such as radii and costs</span>
-<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+<p>When you are done, plot the plexus, dynamics of vessel development and final structure as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">aux</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;color_nodes&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;#030512&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;colormap&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;RdPu&#39;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">lw</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">],</span> <span class="n">dP</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">calc_configuration_flow</span><span class="p">()</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">]),</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">(</span><span class="n">linewidth</span> <span class="o">=</span> <span class="p">[</span><span class="mf">10.</span><span class="o">*</span><span class="n">lw</span><span class="p">],</span> <span class="n">color_edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">lw</span><span class="p">],</span> <span class="o">**</span><span class="n">aux</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">cl</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,255,.1)&#39;</span>
-<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">G</span><span class="o">.</span><span class="n">edges</span><span class="p">())]</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">lw</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">],</span> <span class="n">dP</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">calc_configuration_flow</span><span class="p">()</span>
+<span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">]),</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">fw</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">]</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">(</span><span class="n">linewidth</span> <span class="o">=</span> <span class="p">[</span><span class="mf">5.</span><span class="o">*</span><span class="n">lw</span><span class="p">],</span> <span class="n">color_edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">lw</span><span class="p">],</span> <span class="o">**</span><span class="n">aux</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
 <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
-    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">nsol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">cl</span><span class="p">}))</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p><img alt="dynamics" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/dynamics_murray.png" /><br>
-You can customize what the interactive plots display:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">3.</span>
-<span class="n">fig</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="p">[</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]])</span>
-<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ys</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nsol</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
 
-<span class="n">Q</span><span class="p">,</span> <span class="n">dP</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">calc_configuration_flow</span><span class="p">()</span>
-<span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">],</span> <span class="n">dP</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">calc_configuration_flow</span><span class="p">()</span>
-<span class="n">fig</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">plot_circuit</span><span class="p">(</span><span class="s1">&#39;flow_rate&#39;</span><span class="p">,</span> <span class="n">color_edges</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">Q</span><span class="p">)],</span> <span class="n">linewidth</span><span class="o">=</span><span class="p">[</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;conductivity&#39;</span><span class="p">]])</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">morpheus</span><span class="o">.</span><span class="n">flow</span><span class="o">.</span><span class="n">circuit</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span>
+        <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span> <span class="n">nsol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span> <span class="n">ys</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,255,0.1)&#39;</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;vessel </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><img alt="updated1" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray1.png" /><br>
-<img alt="updated2" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/updated_murray2.png" /><br></p>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/plexus.html" title="plexus"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/dynamics.html" title="dynamics"></iframe><br>
+<iframe src="https://felixk1990.github.io/go-with-the-flow/final.html" title="final"></iframe><br><p>If you like you may generate animations just as easily, e.g. see the examples in the gallery section:</p>
+<p><img alt="updated1" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/murray_triagonal_plexus.gif" /><br>
+<img alt="updated2" src="https://raw.githubusercontent.com/felixk1990/go-with-the-flow/main/gallery/murray_triagonal_dynm.gif" /><br></p>
+<p>Further examples and recipes: <a class="reference external" href="https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>
 </section>
 <section id="requirements">
 <h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">pandas</span></code>,<code class="docutils literal notranslate"><span class="pre">networkx</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">kirchhoff</span></code>, <code class="docutils literal notranslate"><span class="pre">hailhydro</span></code>, <code class="docutils literal notranslate"><span class="pre">plotly</span></code></p>
-</section>
-<section id="gallery">
-<h1>Gallery<a class="headerlink" href="#gallery" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference external" href="https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/HEAD"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a></p>
 </section>
 <section id="acknowledgement">
 <h1>Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permalink to this headline">¶</a></h1>
@@ -169,7 +188,6 @@ You can customize what the interactive plots display:</p>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
-<li><a class="reference internal" href="#gallery">Gallery</a></li>
 <li><a class="reference internal" href="#acknowledgement">Acknowledgement</a></li>
 </ul>
 
