@@ -109,7 +109,7 @@ hailhydro==0.1.1
 kirchhoff==0.2.7
 line_profiler==3.0.2
 networkx==2.5
-numpy==1.21.2
+numpy==1.19.1
 scipy==1.7.3
 plotly==5.6.0
 pandas==1.4.1

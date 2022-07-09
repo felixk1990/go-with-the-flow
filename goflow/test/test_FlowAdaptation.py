@@ -2,8 +2,8 @@
 # @Date:   2022-06-28T17:04:33+02:00
 # @Email:  felixuwekramer@proton.me
 # @Filename: test_modelMurray.py
-# @Last modified by:   felixk1990
-# @Last modified time: 2022-06-29T15:23:59+02:00
+# @Last modified by:   felix
+# @Last modified time: 2022-07-09T12:41:41+02:00
 
 
 import numpy as np
@@ -29,7 +29,7 @@ def initEval(*args):
     pars = args[1:]
     #initialize circuit+flow pattern
     # C = kfi.initialize_circuit_from_crystal('laves',3)
-    C = kfc.initialize_circuit_from_crystal('triagonal_planar',5).G
+    C = kfc.initialize_flow_circuit_from_crystal('triagonal_planar',5).G
     # # initialize dynamic system and set integration parameters
     morpheus = gi.morph_dynamic(C, mode, pars)
     morpheus.evals = 10

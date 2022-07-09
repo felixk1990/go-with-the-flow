@@ -2,12 +2,11 @@
 # @Date:   2022-06-29T13:21:34+02:00
 # @Email:  felixuwekramer@proton.me
 # @Filename: test_Solvers.py
-# @Last modified by:   felixk1990
-# @Last modified time: 2022-06-29T17:47:42+02:00
+# @Last modified by:   felix
+# @Last modified time: 2022-07-09T12:38:52+02:00
 
 
 import numpy as np
-import os
 import os.path as op
 
 import kirchhoff.circuit_flow as kfi
@@ -24,6 +23,7 @@ pars_src = dict(modesSRC='root_geometric')
 pars_plx = dict(modePLX='default')
 mode = 'murray'
 
+
 def tmpDirectory(func):
 
     def modFunc():
@@ -33,29 +33,29 @@ def tmpDirectory(func):
 
     return modFunc
 
+
 def eval_nsol(nsol, morpheus, tag):
 
-
-    dataPoints = zip(nsol.t,nsol.y.transpose())
+    dataPoints = zip(nsol.t, nsol.y.transpose())
     model = morpheus.model
     pars = model.solver_options['args']
     cost = [model.calc_cost_stimuli(t, y, *pars)[0] for t, y in dataPoints]
 
     np.save(op.join(locPath, f'weights_{tag}'), nsol.y.transpose()[-1])
-    np.save(op.join(locPath,f'cost_{tag}'), cost)
+    np.save(op.join(locPath, f'cost_{tag}'), cost)
     #
     # g = morpheus.flow.circuit.G
     # saveGraphJson(g, op.join(locPath,f'graph_{args[0]}'))
 
     return nsol
 
+
 @tmpDirectory
 def test_AutoSolver():
 
-
     for kw in ['f1', 'f2']:
-        #initialize circuit+flow pattern
-        C = kfi.initialize_circuit_from_crystal('triagonal_planar',3).G
+        # initialize circuit+flow pattern
+        C = kfi.initialize_flow_circuit_from_crystal('triagonal_planar', 3).G
         # # initialize dynamic system and set integration parameters
         mrph = gi.morph_dynamic(C, mode, [pars_model, pars_src, pars_plx])
         mrph.evals = 10
@@ -67,19 +67,20 @@ def test_AutoSolver():
         sp = {
             't0': 1e-05,
             't1': .1,
-            'x0': np.power(cnd/cnd_scale,0.25)*0.1,
+            'x0': np.power(cnd/cnd_scale, 0.25)*0.1,
         }
-        nsol = func_dict[kw]((sp['t0'],sp['t1']), sp['x0'])
+        nsol = func_dict[kw]((sp['t0'], sp['t1']), sp['x0'])
         eval_nsol(nsol, mrph, kw)
 
         cnd2 = calc_optimisation(kw)
         assert cnd2
 
+
 @tmpDirectory
 def test_CustomSolver():
 
     # #initialize circuit+flow pattern
-    cfp={
+    cfp = {
         'type': 'hexagonal',
         'periods': 3,
     }
@@ -87,36 +88,39 @@ def test_CustomSolver():
         'modeSRC': 'dipole_border',
     }
     pars_plx = {
-        'modePLX':'default',
+        'modePLX': 'default',
     }
-    C = kfi.initialize_circuit_from_crystal(cfp['type'], cfp['periods'])
+    C = kfi.initialize_flow_circuit_from_crystal(cfp['type'], cfp['periods'])
     F = Flow(C, pars_src, pars_plx)
 
     # set model and model parameters
-    mp={
+    mp = {
         'alpha_0': 1.,
         'alpha_1': 1.
     }
     model = gfm.modelBinder['murray'](pars=mp)
 
     # set solver options for custom integration (without event handling)
-    so={
-        'num_steps':500,
-        'samples':100,
-        'step':0.01,
+    so = {
+        'num_steps': 500,
+        'samples': 100,
+        'step': 0.01,
     }
     model.solver_options.update(so)
     # initialize dynamic system and set integration parameters
-    morpheus = gi.morph_dynamic(F, model,())
+    morpheus = gi.morph_dynamic(F, model, ())
     k1 = morpheus.flow.circuit.edges['conductivity']
     k2 = morpheus.flow.circuit.scales['conductance']
     sp = {
-         'x0': np.power(k1/k2,0.25)
+         'x0': np.power(k1/k2, 0.25)
     }
 
-    nsol = morpheus.nsolve_custom(model.calc_update_stimuli,sp['x0'], **model.solver_options)
+    nsol = morpheus.nsolve_custom(
+        model.calc_update_stimuli, sp['x0'],
+        **model.solver_options
+        )
 
-    #initialize circuit+flow pattern
+    # initialize circuit+flow pattern
     eval_nsol(nsol, morpheus, '')
     cnd2 = calc_optimisation('')
     assert cnd2
