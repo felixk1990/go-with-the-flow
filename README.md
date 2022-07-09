@@ -104,9 +104,9 @@ plt.show()
 If you like you may generate interactive plots with plotly or animations just as easily. See the documentation pages or explore further examples and recipes: <br>
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/felixk1990/go-with-the-flow/examples)
 ##  Requirements
-``` 
-hailhydro==0.1.0
-kirchhoff==0.2.6
+```
+hailhydro==0.1.1
+kirchhoff==0.2.7
 line_profiler==3.0.2
 networkx==2.5
 numpy==1.21.2
