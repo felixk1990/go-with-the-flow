@@ -2,8 +2,8 @@
 # # @Date:   2022-06-29T17:34:40+02:00
 # # @Email:  felixuwekramer@proton.me
 # # @Filename: test_IntertwinedAdaptation.py
-# @Last modified by:   felix
-# @Last modified time: 2022-07-01T15:14:01+02:00
+# @Last modified by:   kramer
+# @Last modified time: 23-03-2023
 #
 #
 # import numpy as np
@@ -13,7 +13,7 @@
 # import kirchhoff.circuit_dual as kid
 # from goflow.adapter import init_ivp as gi
 # from test_Solvers import tmpDirectory
-# from aux import *
+# from helpFunc import *
 #
 # locPath = './goflow/test/tmp'
 # pars_src = dict(modesSRC='dipole_border')
