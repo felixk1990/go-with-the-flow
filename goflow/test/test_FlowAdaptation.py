@@ -2,8 +2,8 @@
 # @Date:   2022-06-28T17:04:33+02:00
 # @Email:  felixuwekramer@proton.me
 # @Filename: test_modelMurray.py
-# @Last modified by:   felixk1990
-# @Last modified time: 2022-06-29T15:23:59+02:00
+# @Last modified by:   kramer
+# @Last modified time: 23-03-2023
 
 
 import numpy as np
@@ -16,7 +16,7 @@ from hailhydro.flow_init import Flow
 
 from goflow.adapter import init_ivp as gi
 from goflow.models.murray import murray
-from aux import *
+from helpFunc import *
 
 locPath = './goflow/test/tmp'
 pars_src = dict(modesSRC='root_geometric')
@@ -29,7 +29,7 @@ def initEval(*args):
     pars = args[1:]
     #initialize circuit+flow pattern
     # C = kfi.initialize_circuit_from_crystal('laves',3)
-    C = kfc.initialize_circuit_from_crystal('triagonal_planar',5).G
+    C = kfc.initialize_flow_circuit_from_crystal('triagonal_planar',5).G
     # # initialize dynamic system and set integration parameters
     morpheus = gi.morph_dynamic(C, mode, pars)
     morpheus.evals = 10
