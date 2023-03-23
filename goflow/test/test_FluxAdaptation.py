@@ -2,8 +2,8 @@
 # # @Date:   2022-06-29T13:16:22+02:00
 # # @Email:  felixuwekramer@proton.me
 # # @Filename: test_FluxAdaptation.py
-# @Last modified by:   felix
-# @Last modified time: 2022-07-09T13:41:13+02:00
+# @Last modified by:   kramer
+# @Last modified time: 23-03-2023
 #
 #
 # import numpy as np
@@ -14,7 +14,7 @@
 # from goflow.adapter import init_ivp as gi
 # from test_FlowAdaptation import setUp, cleanUp, calc_nsol, calc_graphState, calc_optimisation
 #
-# from aux import *
+# from helpFunc import *
 #
 # locPath = './goflow/test/tmp'
 # pars_src = dict(modesSRC='dipole_border')

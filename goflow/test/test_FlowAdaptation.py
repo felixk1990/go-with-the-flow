@@ -2,8 +2,8 @@
 # @Date:   2022-06-28T17:04:33+02:00
 # @Email:  felixuwekramer@proton.me
 # @Filename: test_modelMurray.py
-# @Last modified by:   felix
-# @Last modified time: 2022-07-09T12:41:41+02:00
+# @Last modified by:   kramer
+# @Last modified time: 23-03-2023
 
 
 import numpy as np
@@ -16,7 +16,7 @@ from hailhydro.flow_init import Flow
 
 from goflow.adapter import init_ivp as gi
 from goflow.models.murray import murray
-from aux import *
+from helpFunc import *
 
 locPath = './goflow/test/tmp'
 pars_src = dict(modesSRC='root_geometric')

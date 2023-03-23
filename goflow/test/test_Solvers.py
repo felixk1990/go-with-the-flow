@@ -2,8 +2,8 @@
 # @Date:   2022-06-29T13:21:34+02:00
 # @Email:  felixuwekramer@proton.me
 # @Filename: test_Solvers.py
-# @Last modified by:   felix
-# @Last modified time: 2022-07-09T12:38:52+02:00
+# @Last modified by:   kramer
+# @Last modified time: 23-03-2023
 
 
 import numpy as np
@@ -14,7 +14,7 @@ from hailhydro.flow_init import Flow
 from goflow.adapter import init_ivp as gi
 import goflow.models.binder as gfm
 from test_FlowAdaptation import calc_optimisation, setUp, cleanUp
-from aux import *
+from helpFunc import *
 
 locPath = './goflow/test/tmp'
 
